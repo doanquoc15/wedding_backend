@@ -11,6 +11,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { AuthDto, SignInDto } from "./dto";
 import { JwtPayload, Tokens } from "./types";
 import { PrismaService } from "../prisma/prisma.service";
+import { MESSAGE, httpStatus } from "src/common/errors";
 import { ROLE } from "@prisma/client";
 
 @Injectable()
@@ -21,7 +22,7 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async signupLocal(dto: AuthDto): Promise<Tokens> {
+  async signupLocal(dto: AuthDto): Promise<SignInDto> {
     const existsUser = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -45,16 +46,16 @@ export class AuthService {
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === "P2002") {
-            throw new ForbiddenException("Credentials incorrect");
+          if (error.code === httpStatus.P2002) {
+            throw new ForbiddenException(MESSAGE.AUTH.CREDENTIAL_INCORRECT);
           }
         }
         throw error;
       });
-    const tokens = await this.getTokens(user.id, user.email, user.roleId);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    //const tokens = await this.getTokens(user.id, user.email, user.roleId);
+    //await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return tokens;
+    return user;
   }
 
   async signinLocal(dto: SignInDto): Promise<Tokens> {
@@ -62,14 +63,32 @@ export class AuthService {
       where: {
         email: dto.email,
       },
+      select: {
+        role: {
+          select: {
+            roleName: true,
+          },
+        },
+        hashedRt: true,
+        email: true,
+        roleId: true,
+        id: true,
+        password: true,
+      },
     });
 
-    if (!user) throw new ForbiddenException("Access Denied");
+    if (!user) throw new ForbiddenException(MESSAGE.AUTH.ACCESS_DENIED);
 
     const passwordMatches = await argon.verify(user.password, dto.password);
-    if (!passwordMatches) throw new ForbiddenException("Access Denied");
+    if (!passwordMatches)
+      throw new ForbiddenException(MESSAGE.AUTH.ACCESS_DENIED);
 
-    const tokens = await this.getTokens(user.id, user.email, user.roleId);
+    const tokens = await this.getTokens(
+      user.id,
+      user.email,
+      user.roleId,
+      user.role.roleName,
+    );
 
     await this.updateRtHash(user.id, tokens.refresh_token);
 
@@ -96,13 +115,30 @@ export class AuthService {
       where: {
         id: userId,
       },
+      select: {
+        role: {
+          select: {
+            roleName: true,
+          },
+        },
+        hashedRt: true,
+        email: true,
+        roleId: true,
+        id: true,
+      },
     });
-    if (!user || !user.hashedRt) throw new ForbiddenException("Access Denied");
+    if (!user || !user.hashedRt)
+      throw new ForbiddenException(MESSAGE.AUTH.ACCESS_DENIED);
 
     const rtMatches = await argon.verify(user.hashedRt, rt);
-    if (!rtMatches) throw new ForbiddenException("Access Denied");
+    if (!rtMatches) throw new ForbiddenException(MESSAGE.AUTH.ACCESS_DENIED);
 
-    const tokens = await this.getTokens(user.id, user.email, user.roleId);
+    const tokens = await this.getTokens(
+      user.id,
+      user.email,
+      user.roleId,
+      user.role.roleName,
+    );
     await this.updateRtHash(user.id, tokens.refresh_token);
 
     return tokens;
@@ -124,11 +160,13 @@ export class AuthService {
     userId: number,
     email: string,
     roleId: number,
+    role: ROLE,
   ): Promise<Tokens> {
     const jwtPayload: JwtPayload = {
       sub: userId,
       email: email,
       roleId,
+      role,
     };
 
     const [at, rt] = await Promise.all([
