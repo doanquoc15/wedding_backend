@@ -174,7 +174,7 @@ export class AuthService {
         secret:
           this.config.get<string>(process.env.AT_SECRET) ||
           process.env.AT_SECRET,
-        expiresIn: "15m",
+        expiresIn: "1d",
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret:

@@ -10,25 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//Model
+//===================== MODEL =======================
+
+//1
 model User {
   id        Int               @id @default(autoincrement())
-  name      String?
+  name      String
   phone     String?
   email     String            @unique
   gender    GENDER_ENUM_TYPE?
-  password  String?
-  hash      String?
+  password  String
+  address   String?
   hashedRt  String?
   createdAt DateTime          @default(now()) @map("created_at")
   updatedAt DateTime          @updatedAt @map("updated_at")
 
-  roleId Int?
+  roleId Int
   role   Role? @relation(fields: [roleId], references: [id])
+
+  feedbacks Feedback[]
+  bookings  Booking[]
 
   @@map("users")
 }
 
+//2
 model Role {
   id       Int    @id @default(autoincrement())
   roleName ROLE   @default(CUSTOMER)
@@ -37,7 +43,181 @@ model Role {
   @@map("roles")
 }
 
-//enum
+//3
+model Zone {
+  id       Int       @id @default(autoincrement())
+  zoneName ZONE_ENUM
+  capacity Int
+
+  bookings Booking[]
+
+  @@map("zones")
+}
+
+//4
+model Employee {
+  id           Int           @id @default(autoincrement())
+  employeeName String
+  phone        String
+  address      String
+  salary       Decimal
+  age          Int
+  experience   Int
+  position     POSITION_ENUM
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("emoloyees")
+}
+
+//5
+model Feedback {
+  id      Int    @id @default(autoincrement())
+  rating  Int
+  comment String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  bookingId Int?     @unique
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("feelbacks")
+}
+
+//6
+model Menu {
+  id          Int     @id @default(autoincrement())
+  comboName   String
+  description String
+  totalPrice  Decimal
+
+  bookings  Booking[]
+  menuItems MenuItem[]
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("menus")
+}
+
+//7
+model MenuItem {
+  id          Int     @id @default(autoincrement())
+  dishName    String
+  description String
+  price       Decimal
+  quantity    Int
+  image       String
+
+  menuId   Int
+  menu     Menu     @relation(fields: [menuId], references: [id])
+  typeId   Int
+  typeDish TypeDish @relation(fields: [typeId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("meu_item")
+}
+
+//8
+model TypeDish {
+  id       Int    @id @default(autoincrement())
+  typeName String
+
+  menuItems MenuItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("type_dish")
+}
+
+//9
+model Booking {
+  id            Int      @id @default(autoincrement())
+  numberOfGuest Int
+  depositMoney  Decimal
+  totalMoney    Decimal
+  toTime        DateTime @default(now())
+  fromTime      DateTime
+  numberTable   Int      @map("number_table")
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  menu   Menu @relation(fields: [menuId], references: [id])
+  menuId Int
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  zoneId Int
+  zone   Zone @relation(fields: [zoneId], references: [id])
+
+  table   Table @relation(fields: [tableId], references: [id])
+  tableId Int
+
+  feedback Feedback?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("booking")
+}
+
+//10
+model Service {
+  id          Int     @id @default(autoincrement())
+  serviceName String
+  capacity    Int
+  price       Decimal
+
+  bookings Booking[]
+
+  menus Menu[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("services")
+}
+
+//11
+model RestaurantInformation {
+  id          Int    @id @default(autoincrement())
+  filed       String
+  description String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("restaurant_information")
+}
+
+//12
+model Table {
+  id      Int @id() @default(autoincrement())
+  maxSeat Int
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tables")
+}
+
+//===================== ENUM ======================
+
 enum GENDER_ENUM_TYPE {
   MALE
   FEMALE
@@ -47,4 +227,17 @@ enum GENDER_ENUM_TYPE {
 enum ROLE {
   ADMIN
   CUSTOMER
+  EMPLOYEE
+}
+
+enum ZONE_ENUM {
+  KHU_A
+  KHU_B
+  KHU_C
+  OUTSITE
+}
+
+enum POSITION_ENUM {
+  CHEF
+  STAFF
 }

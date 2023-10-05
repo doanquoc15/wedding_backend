@@ -11,10 +11,12 @@ import {
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { JwtAuthGuard } from "src/auth/jwt.guard";
 import { RolesGuard } from "src/common/guards/role.guard";
 import { Roles } from "src/common/decorators/role.decorator";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("user")
 @Controller("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -29,7 +31,7 @@ export class UserController {
     return this.userService.findAll();
   }
   @UseGuards(RolesGuard)
-  @Roles("ADMIN")
+  @Roles("CUSTOMER")
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(+id);

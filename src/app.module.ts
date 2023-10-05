@@ -6,7 +6,10 @@ import { AtGuard } from "./common/guards";
 import { PrismaModule } from "./prisma/prisma.module";
 import { UserModule } from "./user/user.module";
 import { JwtModule } from "@nestjs/jwt";
-import { JwtStrategy } from "./auth/jwt.strategy";
+import { MenuModule } from './menu/menu.module';
+import { MenuItemModule } from './menu-item/menu-item.module';
+import { ServiceModule } from './service/service.module';
+import { TypeDishModule } from './type-dish/type-dish.module';
 
 @Module({
   imports: [
@@ -18,6 +21,10 @@ import { JwtStrategy } from "./auth/jwt.strategy";
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: "1h" },
     }),
+    MenuModule,
+    MenuItemModule,
+    ServiceModule,
+    TypeDishModule,
   ],
   providers: [
     {

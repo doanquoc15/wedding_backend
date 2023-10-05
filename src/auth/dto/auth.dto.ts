@@ -5,16 +5,16 @@ export class AuthDto {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  @ApiProperty()
+  @ApiProperty({ default: "tuan@gmail.com" })
   email: string;
 
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ default: "1234567" })
   @IsString()
   password: string;
 
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ default: "Tuan Minh" })
   @IsString()
   name: string;
 }
@@ -23,11 +23,11 @@ export class SignInDto {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  @ApiProperty()
+  @ApiProperty({ default: "tuan@gmail.com" })
   email: string;
 
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ default: "1234567" })
   password: string;
 }
