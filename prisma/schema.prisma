@@ -89,59 +89,6 @@ model Feedback {
   @@map("feelbacks")
 }
 
-//6
-model Menu {
-  id          Int     @id @default(autoincrement())
-  comboName   String
-  description String
-  totalPrice  Decimal
-
-  bookings  Booking[]
-  menuItems MenuItem[]
-
-  service   Service @relation(fields: [serviceId], references: [id])
-  serviceId Int
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("menus")
-}
-
-//7
-model MenuItem {
-  id          Int     @id @default(autoincrement())
-  dishName    String
-  description String
-  price       Decimal
-  quantity    Int
-  image       String
-
-  menuId   Int
-  menu     Menu     @relation(fields: [menuId], references: [id])
-  typeId   Int
-  typeDish TypeDish @relation(fields: [typeId], references: [id])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("meu_item")
-}
-
-//8
-model TypeDish {
-  id       Int    @id @default(autoincrement())
-  typeName String
-
-  menuItems MenuItem[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("type_dish")
-}
-
-//9
 model Booking {
   id            Int      @id @default(autoincrement())
   numberOfGuest Int
@@ -154,8 +101,7 @@ model Booking {
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  menu   Menu @relation(fields: [menuId], references: [id])
-  menuId Int
+  menus Menu[]
 
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId Int
@@ -173,6 +119,77 @@ model Booking {
 
   @@map("booking")
 }
+
+//6
+model Menu {
+  id          Int      @id @default(autoincrement())
+  comboName   String
+  description String
+  totalPrice  Decimal?
+
+  bookingId Int
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  bookingFoods BookingFood[]
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("menus")
+}
+
+//13
+model BookingFood {
+  id         Int     @id @default(autoincrement())
+  quantity   Int
+  totalPrice Decimal
+
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
+  menuItemId Int?      @unique
+
+  Menu   Menu @relation(fields: [menuId], references: [id])
+  menuId Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+//7
+model MenuItem {
+  id          Int     @id @default(autoincrement())
+  dishName    String
+  description String
+  price       Decimal
+  image       String?
+
+  bookingFood BookingFood?
+
+  typeId   Int
+  typeDish TypeDish @relation(fields: [typeId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("menu_item")
+}
+
+//8
+model TypeDish {
+  id       Int    @id @default(autoincrement())
+  typeName String
+
+  menuItems MenuItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("type_dish")
+}
+
+//9
 
 //10
 model Service {

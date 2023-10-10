@@ -13,8 +13,8 @@ export class TypeDishController {
   }
 
   @Get()
-  findAll( @Query("page") page : string,@Query("itemsPerPage") itemsPerPage: string) {
-    return this.typeDishService.findAll(parseInt(page), parseInt(itemsPerPage));
+  findAll( @Query("pageIndex") pageIndex : string,@Query("pageSize") pageSize: string) {
+    return this.typeDishService.findAll(parseInt(pageIndex), parseInt(pageSize));
   }
 
   @Get(':id')

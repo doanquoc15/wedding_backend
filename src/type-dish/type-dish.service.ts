@@ -17,7 +17,11 @@ export class TypeDishService {
   async findAll(page:number, itemsPerPage:number) {
     let typeDishes;
     if(!page && !itemsPerPage){
-       typeDishes = await this.prisma.typeDish.findMany();
+       typeDishes = await this.prisma.typeDish.findMany({
+        include:{
+          menuItems: true
+        }
+       });
       return {
         total: typeDishes?.length,
         data:typeDishes

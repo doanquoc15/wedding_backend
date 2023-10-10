@@ -1,20 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MenuService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createMenuDto: CreateMenuDto) {
-    return await this.prisma.menu.create({
-      data: createMenuDto,
-    });
+    //get all food by id in array
+    const bookingFoodList = await this.prisma.bookingFood.findMany({
+      where:{
+        id:{
+          in: createMenuDto.bookingFoods
+        },
+      },
+      include:{
+        menuItem : true
+      }
+    })
+    
+    const totalPrice = bookingFoodList.reduce(
+      (total, item) => total + Number(item.menuItem.price) * item.quantity,
+      0,
+    );
+
+    const menu = await this.prisma.menu.create({
+      data:{
+        comboName: createMenuDto.comboName,
+        description: createMenuDto.description,
+        totalPrice: new Prisma.Decimal(totalPrice),
+        serviceId:createMenuDto.serviceId,
+        bookingId: createMenuDto.bookingId,
+        bookingFoods: {
+          createMany: {
+            data: bookingFoodList,
+          },
+        },
+      }
+    })
+
+    return menu;
   }
 
   async findAll(page: number, itemsPerPage: number) {
-    console.log(page,itemsPerPage)
     const skip = (page - 1) * itemsPerPage;
     const menus = await this.prisma.menu.findMany({
       skip,

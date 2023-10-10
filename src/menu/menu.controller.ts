@@ -16,7 +16,6 @@ export class MenuController {
   @Get()
   findAll( @Query() paginationDto : PaginationDto) {
     const {page = 1, itemsPerPage= 10} = paginationDto;
-    console.log(page, itemsPerPage)
     return this.menuService.findAll(page, itemsPerPage);
   }
 

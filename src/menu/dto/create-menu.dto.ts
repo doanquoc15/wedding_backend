@@ -1,19 +1,27 @@
-import { IsNotEmpty, IsString, IsNumber, IsDecimal } from 'class-validator';
-
+import { IsNotEmpty, IsArray, ValidateNested, IsNumber, IsPositive, IsOptional } from 'class-validator';
 export class CreateMenuDto {
   @IsNotEmpty()
-  @IsString()
   comboName: string;
 
-  @IsString()
+  @IsNotEmpty()
   description: string;
 
   @IsNotEmpty()
-  @IsDecimal()
-  totalPrice: number;
-
+  @IsNumber()
+  serviceId : number;
 
   @IsNotEmpty()
   @IsNumber()
-  serviceId :number
+  bookingId : number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  totalPrice: number;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  bookingFoods: number[];
 }

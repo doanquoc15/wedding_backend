@@ -1,9 +1,9 @@
-import { IsInt } from 'class-validator';
+import {  IsNumber } from 'class-validator';
 
 export class PaginationDto {
-  @IsInt()
-  readonly page: number = 1;
+  @IsNumber()
+  readonly pageIndex: number = 1;
 
-  @IsInt()
-  readonly itemsPerPage: number = 10;
+  @IsNumber()
+  readonly pageSize: number = 10;
 }

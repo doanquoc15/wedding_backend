@@ -34,6 +34,10 @@ export class ServiceService {
       orderBy: {
         createdAt: "asc",
       },
+      include:{
+        menus: true,
+        bookings: true
+      }
     });
 
     return {
@@ -45,6 +49,10 @@ export class ServiceService {
   async findOne(id: number) {
     const service = await this.prisma.service.findUnique({
       where: { id },
+      include:{
+        menus: true,
+        bookings: true
+      }
     });
 
     if (!service) {

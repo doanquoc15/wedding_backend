@@ -14,9 +14,8 @@ export class MenuItemController {
   }
 
   @Get()
-  findAll( @Query() paginationDto : PaginationDto) {
-    const {page = 1, itemsPerPage= 10} = paginationDto;
-    return this.menuItemService.findAll(page, itemsPerPage);
+  findAll( @Query("pageIndex") pageIndex : string,@Query("pageSize") pageSize : string,@Query("typeId") typeId : string,@Query("search") search : string) {
+    return this.menuItemService.findAll(+pageIndex, +pageSize, +typeId, search);
   }
 
   @Get(':id')

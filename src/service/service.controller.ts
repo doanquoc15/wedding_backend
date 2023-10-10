@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('service')
 export class ServiceController {

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, IsDecimal } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, IsPositive } from 'class-validator';
 
 export class CreateMenuItemDto {
   @IsNotEmpty()
@@ -9,21 +9,15 @@ export class CreateMenuItemDto {
   description: string;
 
   @IsNotEmpty()
-  @IsDecimal()
+  @IsPositive()
+  @IsNumber()
   price: number;
 
-  @IsNotEmpty()
-  @IsNumber()
-  quantity: number;
-
   @IsString()
+  @IsOptional()
   image: string;
 
   @IsNotEmpty()
   @IsNumber()
   typeId:number
-
-  @IsNotEmpty()
-  @IsNumber()
-  menuId:number
 }
