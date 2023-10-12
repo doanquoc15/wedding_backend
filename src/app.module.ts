@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
+import { ClassSerializerInterceptor, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { AuthModule } from "./auth/auth.module";
 import { AtGuard } from "./common/guards";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -10,6 +10,7 @@ import { MenuModule } from './menu/menu.module';
 import { MenuItemModule } from './menu-item/menu-item.module';
 import { ServiceModule } from './service/service.module';
 import { TypeDishModule } from './type-dish/type-dish.module';
+import { EmployeeModule } from './employee/employee.module';
 
 @Module({
   imports: [
@@ -25,8 +26,13 @@ import { TypeDishModule } from './type-dish/type-dish.module';
     MenuItemModule,
     ServiceModule,
     TypeDishModule,
+    EmployeeModule,
   ],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
     {
       provide: APP_GUARD,
       useClass: AtGuard,

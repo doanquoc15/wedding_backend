@@ -56,19 +56,21 @@ model Zone {
 
 //4
 model Employee {
-  id           Int           @id @default(autoincrement())
+  id           Int              @id @default(autoincrement())
   employeeName String
   phone        String
   address      String
-  salary       Decimal
+  salary       Decimal          @db.Decimal(30, 0)
   age          Int
   experience   Int
+  gender       GENDER_ENUM_TYPE
   position     POSITION_ENUM
+  regency      String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("emoloyees")
+  @@map("employees")
 }
 
 //5
@@ -92,8 +94,8 @@ model Feedback {
 model Booking {
   id            Int      @id @default(autoincrement())
   numberOfGuest Int
-  depositMoney  Decimal
-  totalMoney    Decimal
+  depositMoney  Decimal  @db.Decimal(30, 0)
+  totalMoney    Decimal  @db.Decimal(30, 0)
   toTime        DateTime @default(now())
   fromTime      DateTime
   numberTable   Int      @map("number_table")
@@ -125,7 +127,7 @@ model Menu {
   id          Int      @id @default(autoincrement())
   comboName   String
   description String
-  totalPrice  Decimal?
+  totalPrice  Decimal? @db.Decimal(30, 0)
 
   bookingId Int
   booking   Booking @relation(fields: [bookingId], references: [id])
@@ -145,7 +147,7 @@ model Menu {
 model BookingFood {
   id         Int     @id @default(autoincrement())
   quantity   Int
-  totalPrice Decimal
+  totalPrice Decimal @db.Decimal(30, 0)
 
   menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
   menuItemId Int?      @unique
@@ -162,7 +164,7 @@ model MenuItem {
   id          Int     @id @default(autoincrement())
   dishName    String
   description String
-  price       Decimal
+  price       Decimal @db.Decimal(30, 0)
   image       String?
 
   bookingFood BookingFood?
@@ -196,7 +198,8 @@ model Service {
   id          Int     @id @default(autoincrement())
   serviceName String
   capacity    Int
-  price       Decimal
+  price       Decimal @db.Decimal(30, 0)
+  image       String
 
   bookings Booking[]
 
@@ -244,7 +247,6 @@ enum GENDER_ENUM_TYPE {
 enum ROLE {
   ADMIN
   CUSTOMER
-  EMPLOYEE
 }
 
 enum ZONE_ENUM {

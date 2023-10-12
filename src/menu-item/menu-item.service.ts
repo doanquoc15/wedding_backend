@@ -29,47 +29,24 @@ export class MenuItemService {
   }
   
   async findAll(pageIndex: number, pageSize: number, typeId: number, search: string) {
-    const existType = await this.prisma.typeDish.findUnique({
-      where: {
-        id: typeId,
-        
-      },
-    });
-    if (!existType) {
-      typeId = undefined;
-    }
+    const typeCondition = typeId ? { typeId } : {};
     const skip = (Number(pageIndex || 1) - 1) * Number(pageSize || 10);
-    const menus = typeId
-      ? await this.prisma.menuItem.findMany({
-          where: {
-            typeId,
-            dishName: {
-              contains: search ? String(search) : undefined,
-              mode: "insensitive",
-            },
-          },
-          skip,
-          take: Number(pageSize),
-        })
-      : await this.prisma.menuItem.findMany({
-          skip,
-          take: Number(pageSize),
-          where : {
-            dishName: {
-              contains: search ? String(search) : undefined,
-              mode: "insensitive",
-            },
-          }
-        });
-
-    const total = await this.prisma.menuItem.count({
-      where: {
-        typeId,
-      },
-    });
-
+  
+    const [menus, total] = await Promise.all([
+      this.prisma.menuItem.findMany({
+        where: {
+          ...typeCondition,
+          dishName: search ? { contains: search, mode: "insensitive" } : undefined,
+        },
+        skip,
+        take: Number(pageSize),
+      }),
+      this.prisma.menuItem.count({ where: typeCondition }),
+    ]);
+  
     return { menus, total };
   }
+  
 
   findOne(id: number) {
     return `This action returns a #${id} menuItem`;
