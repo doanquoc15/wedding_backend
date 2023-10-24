@@ -17,31 +17,27 @@ export class ServiceService {
     });
   }
 
-  async findAll(page: number, itemsPerPage: number) {
-    let services;
-    if (!page && !itemsPerPage) {
-      services = await this.prisma.service.findMany();
-      return {
-        total: services?.length,
-        data: services,
-      };
-    }
+  async findAll(query) {
+    const { pageSize, pageIndex } = query;
+    const skip = (+pageIndex - 1) * +pageSize;
+    const take = +pageSize || 5;
 
-    const skip = (page - 1) * itemsPerPage;
-    services = await this.prisma.service.findMany({
+    const services = await this.prisma.service.findMany({
       skip: skip || 0,
-      take: itemsPerPage || 5,
+      take,
       orderBy: {
         createdAt: "asc",
       },
-      include:{
-        menus: true,
-        bookings: true
-      }
+      include: {
+        comboMenus: true,
+        bookings: true,
+      },
     });
 
+    const total = await this.prisma.service.count();
+
     return {
-      total: services?.length,
+      total,
       data: services,
     };
   }
@@ -49,10 +45,10 @@ export class ServiceService {
   async findOne(id: number) {
     const service = await this.prisma.service.findUnique({
       where: { id },
-      include:{
-        menus: true,
-        bookings: true
-      }
+      include: {
+        comboMenus: true,
+        bookings: true,
+      },
     });
 
     if (!service) {
@@ -68,7 +64,9 @@ export class ServiceService {
     });
 
     if (!existsService) {
-      throw new NotFoundException("Không tìm thấy thông tin dữ liệu muốn thay đổi!");
+      throw new NotFoundException(
+        "Không tìm thấy thông tin dữ liệu muốn thay đổi!",
+      );
     }
     return this.prisma.service.update({
       where: {

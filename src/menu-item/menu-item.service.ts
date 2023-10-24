@@ -27,26 +27,32 @@ export class MenuItemService {
       },
     });
   }
-  
-  async findAll(pageIndex: number, pageSize: number, typeId: number, search: string) {
+
+  async findAll(query) {
+    const { pageSize, pageIndex, typeId, search } = query;
     const typeCondition = typeId ? { typeId } : {};
-    const skip = (Number(pageIndex || 1) - 1) * Number(pageSize || 10);
-  
+    const skip = (Number(pageIndex || 1) - 1) * Number(pageSize || 5) || 0;
+    const take = +pageSize || 5;
+
     const [menus, total] = await Promise.all([
       this.prisma.menuItem.findMany({
         where: {
           ...typeCondition,
-          dishName: search ? { contains: search, mode: "insensitive" } : undefined,
+          dishName: search
+            ? { contains: search, mode: "insensitive" }
+            : undefined,
         },
         skip,
-        take: Number(pageSize),
+        take,
+        include: {
+          typeDish: true,
+        },
       }),
       this.prisma.menuItem.count({ where: typeCondition }),
     ]);
-  
+
     return { menus, total };
   }
-  
 
   findOne(id: number) {
     return `This action returns a #${id} menuItem`;

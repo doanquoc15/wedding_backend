@@ -6,14 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { RolesGuard } from "src/common/guards/role.guard";
-import { Roles } from "src/common/decorators/role.decorator";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { GetCurrentUserId } from "src/common/decorators";
 
 @ApiBearerAuth()
 @ApiTags("user")
@@ -30,11 +28,18 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
-  @UseGuards(RolesGuard)
-  @Roles("CUSTOMER")
+  //@UseGuards(RolesGuard)
+  //@Roles("CUSTOMER")
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(+id);
+  }
+
+  //@Public()
+  //@UseGuards(RtGuard)
+  @Get("me/role")
+  getMe(@GetCurrentUserId() userId) {
+    return this.userService.getMe(+userId);
   }
 
   @Patch(":id")

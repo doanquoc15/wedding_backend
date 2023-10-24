@@ -33,6 +33,17 @@ export class AuthService {
       throw new ConflictException();
     }
 
+    const idRole = await this.prisma.role.findMany({
+      where: {
+        roleName: ROLE.CUSTOMER,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    console.log(idRole);
+
     const hash = await argon.hash(dto.password);
 
     const user = await this.prisma.user
@@ -41,7 +52,7 @@ export class AuthService {
           email: dto.email,
           password: hash,
           name: dto.name,
-          roleId: 2,
+          roleId: idRole[0].id,
         },
       })
       .catch((error) => {
@@ -52,28 +63,17 @@ export class AuthService {
         }
         throw error;
       });
-    //const tokens = await this.getTokens(user.id, user.email, user.roleId);
-    //await this.updateRtHash(user.id, tokens.refresh_token);
 
     return user;
   }
 
-  async signinLocal(dto: SignInDto): Promise<Tokens> {
+  async signinLocal(dto: SignInDto): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
       },
-      select: {
-        role: {
-          select: {
-            roleName: true,
-          },
-        },
-        hashedRt: true,
-        email: true,
-        roleId: true,
-        id: true,
-        password: true,
+      include: {
+        role: true,
       },
     });
 
@@ -92,7 +92,10 @@ export class AuthService {
 
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return tokens;
+    return {
+      tokens,
+      user,
+    };
   }
 
   async logout(userId: number): Promise<boolean> {
@@ -115,16 +118,8 @@ export class AuthService {
       where: {
         id: userId,
       },
-      select: {
-        role: {
-          select: {
-            roleName: true,
-          },
-        },
-        hashedRt: true,
-        email: true,
-        roleId: true,
-        id: true,
+      include: {
+        role: true,
       },
     });
     if (!user || !user.hashedRt)

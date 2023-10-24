@@ -1,14 +1,11 @@
-import { POSITION_ENUM } from "@prisma/client";
-import { Type } from "class-transformer";
 import {
-  IsEnum,
   IsNumber,
   IsNumberString,
   IsOptional,
   IsString,
 } from "class-validator";
 
-export class EmployeeDto {
+export class GetAllMenuItem {
   @IsNumberString()
   @IsOptional()
   pageSize: number | string;
@@ -19,10 +16,9 @@ export class EmployeeDto {
 
   @IsNumber()
   @IsOptional()
-  @IsEnum(POSITION_ENUM)
-  position: number;
+  typeId: number;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   search: string;
 }

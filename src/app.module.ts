@@ -6,11 +6,12 @@ import { AtGuard } from "./common/guards";
 import { PrismaModule } from "./prisma/prisma.module";
 import { UserModule } from "./user/user.module";
 import { JwtModule } from "@nestjs/jwt";
-import { MenuModule } from './menu/menu.module';
-import { MenuItemModule } from './menu-item/menu-item.module';
-import { ServiceModule } from './service/service.module';
-import { TypeDishModule } from './type-dish/type-dish.module';
-import { EmployeeModule } from './employee/employee.module';
+import { MenuItemModule } from "./menu-item/menu-item.module";
+import { ServiceModule } from "./service/service.module";
+import { TypeDishModule } from "./type-dish/type-dish.module";
+import { EmployeeModule } from "./employee/employee.module";
+import { ComboMenuModule } from "./combo-menu/combo-menu.module";
+import { StripeModule } from "./stripe/stripe.module";
 
 @Module({
   imports: [
@@ -22,20 +23,21 @@ import { EmployeeModule } from './employee/employee.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: "1h" },
     }),
-    MenuModule,
     MenuItemModule,
     ServiceModule,
     TypeDishModule,
     EmployeeModule,
+    ComboMenuModule,
+    StripeModule,
   ],
   providers: [
     {
-      provide: APP_INTERCEPTOR,
-      useClass: ClassSerializerInterceptor,
-    },
-    {
       provide: APP_GUARD,
       useClass: AtGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
     },
   ],
 })

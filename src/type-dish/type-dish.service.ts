@@ -1,45 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTypeDishDto } from './dto/create-type-dish.dto';
-import { UpdateTypeDishDto } from './dto/update-type-dish.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CreateTypeDishDto } from "./dto/create-type-dish.dto";
+import { UpdateTypeDishDto } from "./dto/update-type-dish.dto";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class TypeDishService {
   constructor(private readonly prisma: PrismaService) {}
   create(createTypeDishDto: CreateTypeDishDto) {
     return this.prisma.typeDish.create({
-      data:{
-        ...createTypeDishDto
-      }
-    })
-  }
-
-  async findAll(page:number, itemsPerPage:number) {
-    let typeDishes;
-    if(!page && !itemsPerPage){
-       typeDishes = await this.prisma.typeDish.findMany({
-        include:{
-          menuItems: true
-        }
-       });
-      return {
-        total: typeDishes?.length,
-        data:typeDishes
-      }
-    }
-
-    const skip = (page  - 1) * itemsPerPage;
-    typeDishes = await this.prisma.typeDish.findMany({
-      skip: skip || 0,
-      take: itemsPerPage || 5,
-      orderBy: {
-        createdAt: 'asc',
+      data: {
+        ...createTypeDishDto,
       },
     });
-    
+  }
+
+  async findAll(query) {
+    const { pageIndex, pageSize } = query;
+    const skip = (+pageIndex || 1 - 1) * +pageSize;
+    const take = +pageSize || 5;
+
+    const comboMenus = await this.prisma.typeDish.findMany({
+      skip: skip,
+      take,
+      orderBy: {
+        createdAt: "asc",
+      },
+      include: {
+        menuItems: true,
+      },
+    });
+
+    const total = await this.prisma.service.count();
+
     return {
-      total : typeDishes?.length,
-      data: typeDishes
+      total,
+      data: comboMenus,
     };
   }
 
@@ -52,28 +47,29 @@ export class TypeDishService {
       throw new NotFoundException("Không tìm thấy dữ liệu!");
     }
 
+    return typeDish;
   }
 
   async update(id: number, updateTypeDishDto: UpdateTypeDishDto) {
     const existsTypeDish = await this.prisma.typeDish.findUnique({
-      where:{id}
-    })
+      where: { id },
+    });
 
-    if(!existsTypeDish){
+    if (!existsTypeDish) {
       throw new NotFoundException();
     }
 
     return await this.prisma.typeDish.update({
-      where:{id},
-      data : {
-        ...updateTypeDishDto
-      }
-    })
+      where: { id },
+      data: {
+        ...updateTypeDishDto,
+      },
+    });
   }
 
   async remove(id: number) {
     return await this.prisma.typeDish.delete({
-      where:{id}
-    })
+      where: { id },
+    });
   }
 }

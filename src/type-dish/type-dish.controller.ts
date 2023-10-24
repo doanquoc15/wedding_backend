@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { TypeDishService } from './type-dish.service';
-import { CreateTypeDishDto } from './dto/create-type-dish.dto';
-import { UpdateTypeDishDto } from './dto/update-type-dish.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+} from "@nestjs/common";
+import { TypeDishService } from "./type-dish.service";
+import { CreateTypeDishDto } from "./dto/create-type-dish.dto";
+import { UpdateTypeDishDto } from "./dto/update-type-dish.dto";
+import { GetAllTypeDish } from "./dto/type-dish.dto";
 
-@Controller('type-dish')
+@Controller("type-dish")
 export class TypeDishController {
   constructor(private readonly typeDishService: TypeDishService) {}
 
@@ -13,22 +24,25 @@ export class TypeDishController {
   }
 
   @Get()
-  findAll( @Query("pageIndex") pageIndex : string,@Query("pageSize") pageSize: string) {
-    return this.typeDishService.findAll(parseInt(pageIndex), parseInt(pageSize));
+  findAll(@Query() query: GetAllTypeDish) {
+    return this.typeDishService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(":id")
+  findOne(@Param("id", ParseIntPipe) id: number) {
     return this.typeDishService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeDishDto: UpdateTypeDishDto) {
+  @Patch(":id")
+  update(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() updateTypeDishDto: UpdateTypeDishDto,
+  ) {
     return this.typeDishService.update(+id, updateTypeDishDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id") id: string) {
     return this.typeDishService.remove(+id);
   }
 }
