@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateComboMenuDto } from "./dto/create-combo-menu.dto";
 import { UpdateComboMenuDto } from "./dto/update-combo-menu.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma } from "@prisma/client";
+import { Prisma, STATUS_COMBO } from "@prisma/client";
 
 @Injectable()
 export class ComboMenuService {
@@ -27,6 +27,7 @@ export class ComboMenuService {
         ...comboItem,
         comboMenuId: +comboMenu.id,
         totalPrice: new Prisma.Decimal(comboItem.totalPrice),
+        status: STATUS_COMBO.AVAILABLE,
       })),
     });
 
@@ -50,7 +51,7 @@ export class ComboMenuService {
       },
     });
 
-    const total = await this.prisma.service.count();
+    const total = await this.prisma.comboMenu.count();
 
     return {
       total,

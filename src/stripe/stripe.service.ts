@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { GetCurrentUser, GetCurrentUserId } from "src/common/decorators";
 import { PrismaService } from "src/prisma/prisma.service";
 import Stripe from "stripe";
 
@@ -11,6 +12,18 @@ export class StripeService {
       apiVersion: "2023-10-16",
       typescript: true,
     });
+  }
+
+  async checkout(userId : number, user: any){
+    if(!userId || !user){
+      throw new UnauthorizedException();
+    }
+    
+    const userSubscription = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
   }
 
   async createCheckoutSession(

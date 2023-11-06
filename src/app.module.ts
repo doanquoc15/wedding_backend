@@ -12,6 +12,9 @@ import { TypeDishModule } from "./type-dish/type-dish.module";
 import { EmployeeModule } from "./employee/employee.module";
 import { ComboMenuModule } from "./combo-menu/combo-menu.module";
 import { StripeModule } from "./stripe/stripe.module";
+import { CustomizedComboModule } from './customized-combo/customized-combo.module';
+import { ZoneModule } from './zone/zone.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { StripeModule } from "./stripe/stripe.module";
     EmployeeModule,
     ComboMenuModule,
     StripeModule,
+    CustomizedComboModule,
+    ZoneModule,
+    MailModule,
   ],
   providers: [
     {
