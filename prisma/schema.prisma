@@ -47,8 +47,8 @@ model Role {
 
 //3
 model Zone {
-  id       Int       @id @default(autoincrement())
-  zoneName String 
+  id         Int    @id @default(autoincrement())
+  zoneName   String
   numberRoom Int
 
   bookings Booking[]
@@ -99,7 +99,7 @@ model Booking {
   depositMoney  Decimal  @db.Decimal(60, 2)
   totalMoney    Decimal  @db.Decimal(60, 2)
   toTime        DateTime @default(now())
-  fromTime      DateTime
+  time          String[]
   numberTable   Int      @map("number_table")
 
   userId Int
@@ -108,8 +108,13 @@ model Booking {
   comboMenuId Int
   comboMenu   ComboMenu @relation(fields: [comboMenuId], references: [id])
 
+  comboCustomizedId Int
+  comboCustomized   CustomizedComboMenu @relation(fields: [comboCustomizedId], references: [id])
+
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId Int
+
+  statusBooking STATUS_BOOKING @default(PENDING)
 
   zoneId Int
   zone   Zone @relation(fields: [zoneId], references: [id])
@@ -148,9 +153,9 @@ model CustomizedComboMenu {
   user   User @relation(fields: [userId], references: [id])
 
   comboMenuId Int
-  comboMenu   ComboMenu @relation(fields: [comboMenuId], references: [id])
-
-  comboItems ComboItem[]
+  comboMenu   ComboMenu   @relation(fields: [comboMenuId], references: [id])
+  bookings    Booking[]
+  comboItems  ComboItem[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -242,7 +247,6 @@ model RestaurantInformation {
   @@map("restaurant_information")
 }
 
-
 //===================== ENUM ======================
 
 enum GENDER_ENUM_TYPE {
@@ -264,4 +268,9 @@ enum POSITION_ENUM {
 enum STATUS_COMBO {
   CUSTOMIZED
   AVAILABLE
+}
+
+enum STATUS_BOOKING {
+  APPROVED
+  PENDING
 }

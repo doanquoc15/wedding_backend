@@ -1,24 +1,19 @@
-import { Controller, Post, Body, Get } from "@nestjs/common";
-import { StripeService } from "./stripe.service";
-import { GetCurrentUser, GetCurrentUserId } from "src/common/decorators";
+import { Body, Controller, Post } from '@nestjs/common';
 
-@Controller("stripe")
+import { StripeService } from './stripe.service';
+
+//import { Cart } from './Cart.model';
+
+@Controller('stripe')
 export class StripeController {
-  constructor(private readonly stripeService: StripeService) {}
+  constructor(private stripeService: StripeService) {}
 
-  @Get("checkout")
-  async checkoutStripe (@GetCurrentUserId() userId: number,@GetCurrentUser() user : any ) {
-    return this.stripeService.checkout(userId, user);
+  @Post()
+  checkout(@Body() body) {
+    try {
+      return this.stripeService.checkout(body);
+    } catch (error) {
+      return error;
+    }
   }
-
-
-  @Post("webhook")
-  async createCheckoutSession(@Body() data: { productIds; userId }) {
-    const session = await this.stripeService.createCheckoutSession(
-      data.productIds,
-      data.userId,
-    );
-
-    return session.url;
-  }
-}
+}``

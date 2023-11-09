@@ -7,12 +7,12 @@ import {
   Param,
   Delete,
   Query,
-  Inject,
 } from "@nestjs/common";
 import { EmployeeService } from "./employee.service";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
 import { EmployeeDto } from "./dto/EmployeeDto.dto";
+import { Public } from "src/common/decorators";
 
 @Controller("employee")
 export class EmployeeController {
@@ -24,6 +24,7 @@ export class EmployeeController {
   }
 
   @Get()
+  @Public()
   findAll(@Query() query: EmployeeDto) {
     return this.employeeService.findAll(query);
   }

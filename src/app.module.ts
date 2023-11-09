@@ -15,6 +15,7 @@ import { StripeModule } from "./stripe/stripe.module";
 import { CustomizedComboModule } from './customized-combo/customized-combo.module';
 import { ZoneModule } from './zone/zone.module';
 import { MailModule } from './mail/mail.module';
+import { BookModule } from './book/book.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MailModule } from './mail/mail.module';
     CustomizedComboModule,
     ZoneModule,
     MailModule,
+    BookModule,
   ],
   providers: [
     {
