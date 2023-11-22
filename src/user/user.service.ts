@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { MESSAGE } from "src/common/errors";
+import { ChangePasswordDto } from "./dto/change-password.dto";
+import * as argon from "argon2";
 
 @Injectable()
 export class UserService {
@@ -48,19 +54,67 @@ export class UserService {
     return user;
   }
 
-  getMe(userId: number) {
-    return this.prisma.user.findUnique({
+  async getMe(userId: number) {
+    return await this.prisma.user.findUnique({
       where: {
         id: userId,
-      },
-      select: {
-        role: true,
       },
     });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    if (!id) {
+      throw new NotFoundException(MESSAGE.USER.NOT_FOUND);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    console.log("user", user);
+    if (!user) {
+      throw new NotFoundException(MESSAGE.USER.NOT_FOUND);
+    }
+
+    const updateUser = await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        ...user,
+        ...updateUserDto,
+        dateOfBirth: new Date(updateUserDto.dateOfBirth),
+      },
+    });
+    return updateUser;
+  }
+
+  async changePass(id: number, passwordUpdate: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+    const isMatch = await argon.verify(
+      user.password,
+      passwordUpdate.oldPassword,
+    );
+
+    if (!isMatch) {
+      throw new ConflictException(MESSAGE.USER.NOT_MATCH_PASS);
+    } else {
+      const newPass = await argon.hash(passwordUpdate.newPassword);
+      const updateUser = await this.prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          ...user,
+          password: newPass,
+        },
+      });
+      return updateUser;
+    }
   }
 
   remove(id: number) {

@@ -47,6 +47,6 @@ import { BookModule } from './book/book.module';
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
     },
-  ],
+   ],
 })
 export class AppModule {}

@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   //swagger
@@ -31,6 +32,8 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Register handlebars helpers
   await app.listen(process.env.PORT || 8080, () => {
     console.log("Server run with PORT ", process.env.PORT);
   });

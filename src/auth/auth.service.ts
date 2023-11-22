@@ -42,7 +42,6 @@ export class AuthService {
       },
     });
 
-    console.log(idRole);
 
     const hash = await argon.hash(dto.password);
 
@@ -110,6 +109,7 @@ export class AuthService {
         hashedRt: null,
       },
     });
+
     return true;
   }
 

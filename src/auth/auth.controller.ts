@@ -41,6 +41,7 @@ export class AuthController {
 
   @ApiResponse({ status: 201, description: "Logout successfully!" })
   @ApiResponse({ status: 401, description: "Logout failed!" })
+  @Public()
   @Post("logout")
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUserId() userId: number): Promise<boolean> {

@@ -3,9 +3,7 @@ import { Module } from "@nestjs/common";
 import { MailService } from "./mail.service";
 import { join } from "path";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { HandlebarsAdapter, MailerService } from "@nest-modules/mailer";
-//import { BullModule } from '@nestjs/bull';
-
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 @Module({
   imports: [
     MailerModule.forRootAsync({
@@ -24,9 +22,9 @@ import { HandlebarsAdapter, MailerService } from "@nest-modules/mailer";
         },
         template: {
           dir: join(__dirname, "./templates"),
-          adapter: new HandlebarsAdapter(),
+          adapter: new EjsAdapter(),
           options: {
-            strict: true,
+            strict: false,
           },
         },
       }),

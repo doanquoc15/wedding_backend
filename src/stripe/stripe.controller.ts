@@ -1,10 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from "@nestjs/common";
 
-import { StripeService } from './stripe.service';
+import { StripeService } from "./stripe.service";
 
-//import { Cart } from './Cart.model';
-
-@Controller('stripe')
+@Controller("stripe")
 export class StripeController {
   constructor(private stripeService: StripeService) {}
 
@@ -16,4 +14,4 @@ export class StripeController {
       return error;
     }
   }
-}``
+}

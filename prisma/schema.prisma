@@ -12,19 +12,20 @@ datasource db {
 
 //===================== MODEL =======================
 
-//1
+// 1
 model User {
-  id        Int               @id @default(autoincrement())
-  name      String
-  phone     String?
-  image     String?           @default("https://haycafe.vn/wp-content/uploads/2023/04/Hinh-anh-avatar-cute-TikTok-nam.jpg")
-  email     String            @unique
-  gender    GENDER_ENUM_TYPE?
-  password  String
-  address   String?
-  hashedRt  String?
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @updatedAt @map("updated_at")
+  id          Int               @id @default(autoincrement())
+  name        String
+  phone       String?
+  image       String?           @default("https://haycafe.vn/wp-content/uploads/2023/04/Hinh-anh-avatar-cute-TikTok-nam.jpg")
+  email       String            @unique
+  dateOfBirth DateTime?
+  gender      GENDER_ENUM_TYPE?
+  password    String
+  address     String?
+  hashedRt    String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
 
   roleId Int
   role   Role? @relation(fields: [roleId], references: [id])
@@ -36,7 +37,7 @@ model User {
   @@map("users")
 }
 
-//2
+// 2
 model Role {
   id       Int    @id @default(autoincrement())
   roleName ROLE   @default(CUSTOMER)
@@ -45,7 +46,7 @@ model Role {
   @@map("roles")
 }
 
-//3
+// 3
 model Zone {
   id         Int    @id @default(autoincrement())
   zoneName   String
@@ -56,7 +57,7 @@ model Zone {
   @@map("zones")
 }
 
-//4
+// 4
 model Employee {
   id           Int              @id @default(autoincrement())
   employeeName String
@@ -75,7 +76,7 @@ model Employee {
   @@map("employees")
 }
 
-//5
+// 5
 model Feedback {
   id      Int    @id @default(autoincrement())
   rating  Int
@@ -108,9 +109,6 @@ model Booking {
   comboMenuId Int
   comboMenu   ComboMenu @relation(fields: [comboMenuId], references: [id])
 
-  comboCustomizedId Int
-  comboCustomized   CustomizedComboMenu @relation(fields: [comboCustomizedId], references: [id])
-
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId Int
 
@@ -127,7 +125,7 @@ model Booking {
   @@map("booking")
 }
 
-//6
+// 6
 model ComboMenu {
   id          Int      @id @default(autoincrement())
   comboName   String
@@ -154,7 +152,6 @@ model CustomizedComboMenu {
 
   comboMenuId Int
   comboMenu   ComboMenu   @relation(fields: [comboMenuId], references: [id])
-  bookings    Booking[]
   comboItems  ComboItem[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -185,7 +182,7 @@ model ComboItem {
   @@map("combo_items")
 }
 
-//7
+// 7
 model MenuItem {
   id          Int     @id @default(autoincrement())
   dishName    String
@@ -204,7 +201,7 @@ model MenuItem {
   @@map("menu_item")
 }
 
-//8
+// 8
 model TypeDish {
   id       Int    @id @default(autoincrement())
   typeName String
@@ -217,7 +214,7 @@ model TypeDish {
   @@map("type_dish")
 }
 
-//10
+// 10
 model Service {
   id          Int     @id @default(autoincrement())
   serviceName String
@@ -235,7 +232,7 @@ model Service {
   @@map("services")
 }
 
-//11
+// 11
 model RestaurantInformation {
   id          Int    @id @default(autoincrement())
   filed       String

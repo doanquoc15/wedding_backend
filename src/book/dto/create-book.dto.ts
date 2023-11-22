@@ -1,5 +1,5 @@
 import { STATUS_BOOKING } from "@prisma/client";
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from "class-validator";
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from "class-validator";
 
 export class CreateBookDto {
     @IsNumber()
@@ -32,6 +32,7 @@ export class CreateBookDto {
 
     @IsNumber()
     @IsNotEmpty()
+    @IsOptional()
     userId : number
 
     @IsNumber()
@@ -48,11 +49,15 @@ export class CreateBookDto {
 
     @IsNumber()
     @IsNotEmpty()
-    comboCustomizedId: number
-
-    @IsNumber()
-    @IsNotEmpty()
     comboMenuId: number
 
-    
+    @IsEmail()
+    @IsNotEmpty()
+    @IsOptional()
+    email: string
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    fullName: string
 }

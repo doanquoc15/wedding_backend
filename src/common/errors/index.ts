@@ -6,6 +6,7 @@ export const MESSAGE = {
 
   USER: {
     NOT_FOUND: "User information not found",
+    NOT_MATCH_PASS: "Mật khẩu không chính xác",
   },
 };
 

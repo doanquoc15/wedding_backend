@@ -1,17 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { GetCurrentUserId } from "src/common/decorators";
+import { RolesGuard } from "src/common/guards/role.guard";
+import { Roles } from "src/common/decorators/role.decorator";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @ApiBearerAuth()
 @ApiTags("user")
@@ -28,8 +32,9 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
-  //@UseGuards(RolesGuard)
-  //@Roles("CUSTOMER")
+
+  @UseGuards(RolesGuard)
+  @Roles("CUSTOMER", "ADMIN")
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(+id);
@@ -37,7 +42,7 @@ export class UserController {
 
   //@Public()
   //@UseGuards(RtGuard)
-  @Get("me/role")
+  @Get("/me/my-account")
   getMe(@GetCurrentUserId() userId) {
     return this.userService.getMe(+userId);
   }
@@ -45,6 +50,15 @@ export class UserController {
   @Patch(":id")
   update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
+  }
+
+  @Patch("change-password/:id")
+  changePassword(
+    @Param("id") id: string,
+    @Body() passwordUpdate: ChangePasswordDto,
+  ) {
+    console.log(id, passwordUpdate);
+    return this.userService.changePass(+id, passwordUpdate);
   }
 
   @Delete(":id")
