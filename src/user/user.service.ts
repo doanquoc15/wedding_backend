@@ -73,7 +73,6 @@ export class UserService {
       },
     });
 
-    console.log("user", user);
     if (!user) {
       throw new NotFoundException(MESSAGE.USER.NOT_FOUND);
     }
@@ -85,7 +84,9 @@ export class UserService {
       data: {
         ...user,
         ...updateUserDto,
-        dateOfBirth: new Date(updateUserDto.dateOfBirth),
+        dateOfBirth: updateUserDto?.dateOfBirth
+          ? new Date(updateUserDto?.dateOfBirth)
+          : undefined,
       },
     });
     return updateUser;

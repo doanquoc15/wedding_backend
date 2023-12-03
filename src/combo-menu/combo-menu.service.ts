@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateComboMenuDto } from "./dto/create-combo-menu.dto";
 import { UpdateComboMenuDto } from "./dto/update-combo-menu.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma, STATUS_COMBO } from "@prisma/client";
+import {  STATUS_COMBO } from "@prisma/client";
 
 @Injectable()
 export class ComboMenuService {
@@ -16,7 +16,7 @@ export class ComboMenuService {
     const comboMenu = await this.prisma.comboMenu.create({
       data: {
         comboName: createComboMenuDto.comboName,
-        totalPrice: new Prisma.Decimal(totalPrice),
+        totalPrice: +totalPrice,
         description: createComboMenuDto.description,
         serviceId: +createComboMenuDto.serviceId,
       },
@@ -26,7 +26,7 @@ export class ComboMenuService {
       data: createComboMenuDto.comboItems?.map((comboItem) => ({
         ...comboItem,
         comboMenuId: +comboMenu.id,
-        totalPrice: new Prisma.Decimal(comboItem.totalPrice),
+        totalPrice: +comboItem.totalPrice,
         status: STATUS_COMBO.AVAILABLE,
       })),
     });

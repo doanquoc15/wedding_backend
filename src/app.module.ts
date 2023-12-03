@@ -16,6 +16,8 @@ import { CustomizedComboModule } from './customized-combo/customized-combo.modul
 import { ZoneModule } from './zone/zone.module';
 import { MailModule } from './mail/mail.module';
 import { BookModule } from './book/book.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { BookModule } from './book/book.module';
     ZoneModule,
     MailModule,
     BookModule,
+    CloudinaryModule,
+    FeedbackModule,
   ],
   providers: [
     {

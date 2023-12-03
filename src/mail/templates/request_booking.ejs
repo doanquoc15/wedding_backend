@@ -8,34 +8,32 @@
 </head>
 
 <body style="font-family: Arial; font-size: 14px">
-    <h1>Thanh toán đơn hàng</h1>
-    <p>Xin chào, <%= name %></p>
-    <p>Cảm ơn bạn đã đặt dịch vụ tại <a href="https://www.abc.com">Sky View Restaurant</a>. Đơn hàng của bạn đã được
-        tiếp nhận và đang được xử lý.</p>
-    </p>
-    <p>Sau đây là chi tiết đơn hàng của bạn : </p>
-    <ul>
-        <li>Ngày nhận phòng: <%= toTime %></li>
-        <li>Khung giờ đã đặt :
-            <% time.forEach(function(item) { %>
-                <span style="border: 1px solid lightgrey; padding: 5px"><%= item %> </span>
-            <% }); %>
-        </li>
-        <li>Số lượng khách : <%= numberOfGuest %></li>
-        <li>Số bàn đã đặt : <%= numberTable %></li>
-        <li>Tổng tiền thanh toán : <%= totalMoney %></li>
-        <li>Tổng tiền cọc trước : <%= depositMoney %></li>
-    </ul>
-    <p>Trạng thái </p>
-    <% if (statusBooking === "PENDING") { %>
-        <p style="color: white; padding: 10px; background-color: red; max-width: fit-content;border-radius: 4px;">Đang chờ duyệt</p>
-    <% } %>
+<h1>Thanh toán đơn hàng</h1>
+<p>Xin chào, <%= name %></p>
+<p>Cảm ơn bạn đã đặt dịch vụ tại <a href="https://www.abc.com">Sky View Restaurant</a>. Đơn hàng của bạn đã được
+    tiếp nhận và đang được xử lý.</p>
+</p>
+<p>Sau đây là chi tiết đơn hàng của bạn : </p>
+<ul>
+    <li>Ngày nhận phòng: <%= toTime %></li>
+    </li>
+    <li>Số lượng khách : <%= numberOfGuest %></li>
+    <li>Số bàn đã đặt : <%= numberTable %></li>
+    <li>Tổng tiền thanh toán : <%= totalMoney %></li>
+    <li>Tổng tiền cọc trước : <%= depositMoney %></li>
+</ul>
+<p>Trạng thái </p>
+<% if (statusBooking === "PENDING") { %>
+    <p style="color: white; padding: 10px; background-color: red; max-width: fit-content;border-radius: 4px;">Đang chờ
+        duyệt</p>
+<% } %>
 
-    <% if (statusBooking === "APPROVED") { %>
-        <p style="color: white; padding: 10px; background-color: green;max-width: fit-content;border-radius: 4px;">Đã duyệt</p>
-    <% } %>
-    <p>Cảm ơn!</p>
-    <p>Sky View</p>
+<% if (statusBooking === "APPROVED") { %>
+    <p style="color: white; padding: 10px; background-color: green;max-width: fit-content;border-radius: 4px;">Đã
+        duyệt</p>
+<% } %>
+<p>Cảm ơn!</p>
+<p>Sky View</p>
 </body>
 
 </html>

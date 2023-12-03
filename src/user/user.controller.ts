@@ -57,7 +57,6 @@ export class UserController {
     @Param("id") id: string,
     @Body() passwordUpdate: ChangePasswordDto,
   ) {
-    console.log(id, passwordUpdate);
     return this.userService.changePass(+id, passwordUpdate);
   }
 

@@ -22,7 +22,7 @@ export class MenuItemService {
     return await this.prisma.menuItem.create({
       data: {
         ...createMenuItemDto,
-        price: new Prisma.Decimal(createMenuItemDto.price),
+        price: +createMenuItemDto.price,
         image: createMenuItemDto.image || undefined,
       },
     });

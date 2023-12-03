@@ -1,12 +1,16 @@
 export const MESSAGE = {
   AUTH: {
-    CREDENTIAL_INCORRECT: "Credentials incorrect",
-    ACCESS_DENIED: "Access Denied",
+    CREDENTIAL_INCORRECT: "Xác thực thất bại",
+    ACCESS_DENIED: "Truy câp thất bại",
   },
 
   USER: {
-    NOT_FOUND: "User information not found",
+    NOT_FOUND: "Không tìm thấy nguời dùng nào",
     NOT_MATCH_PASS: "Mật khẩu không chính xác",
+  },
+
+  BOOKING: {
+    NOT_FOUND: "Không tìm thấy đơn hàng",
   },
 };
 

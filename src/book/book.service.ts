@@ -1,9 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateBookDto } from "./dto/create-book.dto";
 import { UpdateBookDto } from "./dto/update-book.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma } from "@prisma/client";
+import { STATUS_PAYMENT } from "@prisma/client";
 import { MailService } from "src/mail/mail.service";
+import { MESSAGE } from "../common/errors";
+import { GetAllBookDto } from "./dto/get-all-book.dto";
 
 @Injectable()
 export class BookService {
@@ -13,7 +15,7 @@ export class BookService {
   ) {}
 
   async create(createBookDto: CreateBookDto, userId: number) {
-    const booking = this.prisma.booking.create({
+    const booking = await this.prisma.booking.create({
       data: {
         numberTable: createBookDto.numberTable,
         numberOfGuest: createBookDto.numberOfGuest,
@@ -23,8 +25,10 @@ export class BookService {
         statusBooking: "PENDING",
         userId,
         toTime: new Date(createBookDto.toTime),
-        depositMoney: new Prisma.Decimal(createBookDto.depositMoney),
-        totalMoney: new Prisma.Decimal(createBookDto.totalMoney),
+        comeInAt: new Date(createBookDto.comeInAt),
+        comeOutAt: new Date(createBookDto.comeOutAt),
+        depositMoney: createBookDto.depositMoney,
+        totalMoney: createBookDto.totalMoney,
       },
     });
 
@@ -42,7 +46,8 @@ export class BookService {
         template: "request_booking",
         context: {
           name: createBookDto.fullName,
-          time: createBookDto.time,
+          comeInAt: createBookDto.comeInAt,
+          comeOutAt: createBookDto.comeOutAt,
           toTime: createBookDto.toTime,
           depositMoney: createBookDto.depositMoney,
           totalMoney: createBookDto.totalMoney,
@@ -74,16 +79,103 @@ export class BookService {
     return booking;
   }
 
-  findAll() {
-    return `This action returns all book`;
+  async findAll(query: GetAllBookDto) {
+    const { pageSize, pageIndex } = query;
+    const skip = (Number(pageIndex || 1) - 1) * Number(pageSize || 5) || 0;
+    const take = +pageSize || 5;
+
+    const [booking, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        skip,
+        take,
+        include: {
+          comboMenu: {
+            include: {
+              service: true,
+            },
+          },
+        },
+      }),
+
+      this.prisma.booking.count(),
+    ]);
+
+    if (!booking) {
+      throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
+    }
+    return { booking, total };
   }
 
   findOne(id: number) {
     return `This action returns a #${id} book`;
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    return `This action updates a #${id} book`;
+  async findBookingByUserId(id: number) {
+    const bookingByUser = await this.prisma.booking.findMany({
+      where: {
+        userId: id,
+      },
+      include: {
+        zone: true,
+        comboMenu: {
+          include: {
+            service: true,
+            feedbacks: true,
+          },
+        },
+      },
+    });
+
+    if (!bookingByUser) {
+      throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
+    }
+
+    return bookingByUser;
+  }
+
+  async update(id: number, updateBookDto: UpdateBookDto) {
+    const booking = await this.prisma.booking.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    const data =
+      !updateBookDto.toTime &&
+      !updateBookDto.comeInAt &&
+      !updateBookDto.comeOutAt
+        ? {
+            ...updateBookDto,
+            ...booking,
+            statusBooking: updateBookDto.statusBooking,
+            statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
+          }
+        : {
+            ...updateBookDto,
+            ...booking,
+            toTime: new Date(updateBookDto.toTime),
+            comeInAt: new Date(updateBookDto.comeInAt),
+            comeOutAt: new Date(updateBookDto.comeOutAt),
+            statusBooking: updateBookDto.statusBooking,
+            statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
+          };
+
+    const updatedBooking = this.prisma.booking.update({
+      where: {
+        id,
+      },
+      data: {
+        ...updateBookDto,
+        ...booking,
+        ...data,
+      },
+    });
+
+    if (!updatedBooking) {
+      throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
+    }
+
+    return updatedBooking;
   }
 
   remove(id: number) {

@@ -1,63 +1,81 @@
-import { STATUS_BOOKING } from "@prisma/client";
-import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from "class-validator";
+import { STATUS_BOOKING, STATUS_PAYMENT } from "@prisma/client";
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  Min,
+} from "class-validator";
 
 export class CreateBookDto {
-    @IsNumber()
-    @IsNotEmpty()
-    @Min(1)
-    numberOfGuest
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  numberOfGuest;
 
-    @IsNumber()
-    @IsNotEmpty()
-    @Min(1)
-    numberTable
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  numberTable;
 
-    @IsNumber()
-    @IsNotEmpty()
-    @IsPositive()
-    depositMoney: number;
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  depositMoney: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    @IsPositive()
-    totalMoney: number;
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  totalMoney: any;
 
-    @IsNotEmpty()
-    @IsString()
-    toTime : string
+  @IsNotEmpty()
+  @IsString()
+  toTime: string;
 
-    @IsArray()
-    @IsNotEmpty()
-    time : string[]
+  @IsString()
+  @IsNotEmpty()
+  comeInAt: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    @IsOptional()
-    userId : number
+  @IsString()
+  @IsNotEmpty()
+  comeOutAt: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    serviceId: number
+  @IsNumber()
+  @IsNotEmpty()
+  @IsOptional()
+  userId: number;
 
-    @IsEnum(STATUS_BOOKING)
-    @IsOptional()
-    statusBooking: STATUS_BOOKING
+  @IsNumber()
+  @IsNotEmpty()
+  serviceId: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    zoneId: number
+  @IsEnum(STATUS_BOOKING)
+  @IsOptional()
+  statusBooking: STATUS_BOOKING;
 
-    @IsNumber()
-    @IsNotEmpty()
-    comboMenuId: number
+  @IsNumber()
+  @IsNotEmpty()
+  zoneId: number;
 
-    @IsEmail()
-    @IsNotEmpty()
-    @IsOptional()
-    email: string
+  @IsNumber()
+  @IsNotEmpty()
+  comboMenuId: number;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsOptional()
-    fullName: string
+  @IsEmail()
+  @IsNotEmpty()
+  @IsOptional()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  fullName: string;
+
+  @IsEnum(STATUS_PAYMENT)
+  @IsOptional()
+  @IsNotEmpty()
+  statusPayment: STATUS_PAYMENT;
 }

@@ -20,7 +20,7 @@ export class CustomizedComboService {
       data: createCustomizedComboDto.comboItems?.map((comboItem) => ({
         ...comboItem,
         comboCustomizedMenuId: +customComboMenu.id,
-        totalPrice: new Prisma.Decimal(comboItem.totalPrice),
+        totalPrice: +comboItem.totalPrice,
         status: STATUS_COMBO.CUSTOMIZED,
       })),
     });

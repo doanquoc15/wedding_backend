@@ -12,7 +12,7 @@ export class ServiceService {
     return await this.prisma.service.create({
       data: {
         ...createServiceDto,
-        price: new Prisma.Decimal(createServiceDto.price),
+        price: +createServiceDto.price,
       },
     });
   }

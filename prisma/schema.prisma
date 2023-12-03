@@ -63,7 +63,7 @@ model Employee {
   employeeName String
   phone        String
   address      String
-  salary       Decimal          @db.Decimal(60, 2)
+  salary       Int
   age          Int
   experience   Int
   gender       GENDER_ENUM_TYPE
@@ -85,22 +85,23 @@ model Feedback {
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  bookingId Int?     @unique
-  booking   Booking? @relation(fields: [bookingId], references: [id])
+  comboMenuId Int
+  comeboMenu  ComboMenu @relation(fields: [comboMenuId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("feelbacks")
+  @@map("feedbacks")
 }
 
 model Booking {
   id            Int      @id @default(autoincrement())
   numberOfGuest Int
-  depositMoney  Decimal  @db.Decimal(60, 2)
-  totalMoney    Decimal  @db.Decimal(60, 2)
+  depositMoney  Int
+  totalMoney    Int
   toTime        DateTime @default(now())
-  time          String[]
+  comeInAt      DateTime
+  comeOutAt     DateTime
   numberTable   Int      @map("number_table")
 
   userId Int
@@ -114,10 +115,10 @@ model Booking {
 
   statusBooking STATUS_BOOKING @default(PENDING)
 
+  statusPayment STATUS_PAYMENT @default(UNPAID)
+
   zoneId Int
   zone   Zone @relation(fields: [zoneId], references: [id])
-
-  feedback Feedback?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -127,10 +128,10 @@ model Booking {
 
 // 6
 model ComboMenu {
-  id          Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   comboName   String
   description String
-  totalPrice  Decimal? @db.Decimal(60, 2)
+  totalPrice  Int?
 
   bookings             Booking[]
   comboItems           ComboItem[]
@@ -138,6 +139,8 @@ model ComboMenu {
 
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId Int
+
+  feedbacks Feedback[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -161,9 +164,9 @@ model CustomizedComboMenu {
 }
 
 model ComboItem {
-  id         Int     @id @default(autoincrement())
+  id         Int @id @default(autoincrement())
   quantity   Int
-  totalPrice Decimal @db.Decimal(60, 2)
+  totalPrice Int
 
   menuItemId Int
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
@@ -187,7 +190,7 @@ model MenuItem {
   id          Int     @id @default(autoincrement())
   dishName    String
   description String?
-  price       Decimal @db.Decimal(60, 2)
+  price       Int
   image       String?
 
   typeId   Int
@@ -219,7 +222,7 @@ model Service {
   id          Int     @id @default(autoincrement())
   serviceName String
   capacity    Int
-  price       Decimal @db.Decimal(60, 2)
+  price       Int
   image       String? @default("https://img.freepik.com/free-vector/young-waitress-waiter-object-element-professional-service-restaurant_24797-2133.jpg")
 
   bookings Booking[]
@@ -270,4 +273,10 @@ enum STATUS_COMBO {
 enum STATUS_BOOKING {
   APPROVED
   PENDING
+  REJECTED
+}
+
+enum STATUS_PAYMENT {
+  PAID
+  UNPAID
 }

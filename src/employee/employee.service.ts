@@ -12,7 +12,7 @@ export class EmployeeService {
     return await this.prisma.employee.create({
       data: {
         ...createEmployeeDto,
-        salary: new Prisma.Decimal(createEmployeeDto.salary)
+        salary: +createEmployeeDto.salary
       }
     })
   }
