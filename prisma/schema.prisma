@@ -22,14 +22,15 @@ model User {
   dateOfBirth DateTime?
   gender      GENDER_ENUM_TYPE?
   password    String
+  status      STATUS_USER       @default(ACTIVE)
   address     String?
   hashedRt    String?
   createdAt   DateTime          @default(now()) @map("created_at")
   updatedAt   DateTime          @updatedAt @map("updated_at")
 
-  roleId Int
-  role   Role? @relation(fields: [roleId], references: [id])
-
+  roleId               Int
+  role                 Role?                 @relation(fields: [roleId], references: [id])
+  notifications        Notification[]
   feedbacks            Feedback[]
   bookings             Booking[]
   customizedComboMenus CustomizedComboMenu[]
@@ -94,6 +95,7 @@ model Feedback {
   @@map("feedbacks")
 }
 
+// 6
 model Booking {
   id            Int      @id @default(autoincrement())
   numberOfGuest Int
@@ -126,7 +128,7 @@ model Booking {
   @@map("booking")
 }
 
-// 6
+// 7
 model ComboMenu {
   id          Int    @id @default(autoincrement())
   comboName   String
@@ -148,6 +150,7 @@ model ComboMenu {
   @@map("combo_menus")
 }
 
+// 8
 model CustomizedComboMenu {
   id     Int  @id @default(autoincrement())
   userId Int
@@ -163,6 +166,7 @@ model CustomizedComboMenu {
   @@map("customized_combo_menus")
 }
 
+// 9
 model ComboItem {
   id         Int @id @default(autoincrement())
   quantity   Int
@@ -185,7 +189,7 @@ model ComboItem {
   @@map("combo_items")
 }
 
-// 7
+// 10
 model MenuItem {
   id          Int     @id @default(autoincrement())
   dishName    String
@@ -204,7 +208,7 @@ model MenuItem {
   @@map("menu_item")
 }
 
-// 8
+// 11
 model TypeDish {
   id       Int    @id @default(autoincrement())
   typeName String
@@ -217,7 +221,7 @@ model TypeDish {
   @@map("type_dish")
 }
 
-// 10
+// 12
 model Service {
   id          Int     @id @default(autoincrement())
   serviceName String
@@ -235,7 +239,7 @@ model Service {
   @@map("services")
 }
 
-// 11
+// 13
 model RestaurantInformation {
   id          Int    @id @default(autoincrement())
   filed       String
@@ -245,6 +249,23 @@ model RestaurantInformation {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("restaurant_information")
+}
+
+// 14
+model Notification {
+  id          Int               @id @default(autoincrement())
+  title       String
+  description String
+  image       String?
+  userId      Int
+  user        User              @relation(fields: [userId], references: [id])
+  isRead      Boolean           @default(false)
+  type        TYPE_NOTIFICATION @default(INFO)
+  link        String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@map("notifications")
 }
 
 //===================== ENUM ======================
@@ -258,6 +279,11 @@ enum GENDER_ENUM_TYPE {
 enum ROLE {
   ADMIN
   CUSTOMER
+}
+
+enum TYPE_NOTIFICATION {
+  INFO
+  WARNING
 }
 
 enum POSITION_ENUM {
@@ -279,4 +305,9 @@ enum STATUS_BOOKING {
 enum STATUS_PAYMENT {
   PAID
   UNPAID
+}
+
+enum STATUS_USER {
+  ACTIVE
+  INACTIVE
 }

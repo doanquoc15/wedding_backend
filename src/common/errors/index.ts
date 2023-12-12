@@ -7,6 +7,7 @@ export const MESSAGE = {
   USER: {
     NOT_FOUND: "Không tìm thấy nguời dùng nào",
     NOT_MATCH_PASS: "Mật khẩu không chính xác",
+    EMAIL_EXISTS: "Email đã tồn tại",
   },
 
   BOOKING: {

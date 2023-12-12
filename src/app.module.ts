@@ -18,6 +18,7 @@ import { MailModule } from './mail/mail.module';
 import { BookModule } from './book/book.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     BookModule,
     CloudinaryModule,
     FeedbackModule,
+    NotificationModule,
   ],
   providers: [
     {

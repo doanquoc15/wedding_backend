@@ -9,28 +9,65 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { MESSAGE } from "src/common/errors";
 import { ChangePasswordDto } from "./dto/change-password.dto";
 import * as argon from "argon2";
+import { ROLE } from "@prisma/client";
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    return "This action adds a new user";
+  async create(createUserDto: CreateUserDto) {
+    const password_default = "12345678";
+    const existsUser = await this.prisma.user.findUnique({
+      where: {
+        email: createUserDto.email,
+      },
+    });
+    const idRole = await this.prisma.role.findMany({
+      where: {
+        roleName: ROLE.CUSTOMER,
+      },
+      select: {
+        id: true,
+      },
+    });
+    //check exists user by mail
+    console.log(existsUser);
+    if (existsUser) {
+      throw new ConflictException(MESSAGE.USER.EMAIL_EXISTS);
+    }
+    const hasPass = await argon.hash(password_default);
+    const createdUser = await this.prisma.user.create({
+      data: {
+        ...createUserDto,
+        password: hasPass,
+        dateOfBirth: createUserDto?.dateOfBirth
+          ? new Date(createUserDto?.dateOfBirth)
+          : undefined,
+        roleId: idRole[0].id,
+      },
+    });
+
+    return createdUser;
   }
 
-  async findAll() {
+  async findAll(query) {
+    const { pageIndex, pageSize, search } = query;
+    const skip = (+pageIndex - 1) * +pageSize;
+    const take = +pageSize;
+
     const users = await this.prisma.user.findMany({
-      select: {
-        name: true,
-        email: true,
-        phone: true,
-        createdAt: true,
-        roleId: true,
-        role: {
-          select: {
-            roleName: true,
-          },
-        },
+      where: {
+        name: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
+      skip: skip || 0,
+      take,
+      include: {
+        role: true,
       },
     });
     if (!users) {
@@ -118,7 +155,12 @@ export class UserService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const deleteUser = await this.prisma.user.delete({
+      where: {
+        id,
+      },
+    });
+    return deleteUser;
   }
 }

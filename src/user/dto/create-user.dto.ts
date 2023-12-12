@@ -22,10 +22,12 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   password: string;
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   roleId: number;
 
   @IsString()

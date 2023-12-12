@@ -4,18 +4,20 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { GetCurrentUserId } from "src/common/decorators";
 import { RolesGuard } from "src/common/guards/role.guard";
 import { Roles } from "src/common/decorators/role.decorator";
 import { ChangePasswordDto } from "./dto/change-password.dto";
+import { GetAllUsers } from "./dto/user.dto";
 
 @ApiBearerAuth()
 @ApiTags("user")
@@ -29,8 +31,8 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() query: GetAllUsers) {
+    return this.userService.findAll(query);
   }
 
   @UseGuards(RolesGuard)
@@ -48,7 +50,8 @@ export class UserController {
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(@Param("id", ParseIntPipe) id: number, @Body() updateUserDto: any) {
+    console.log(updateUserDto);
     return this.userService.update(+id, updateUserDto);
   }
 
@@ -61,7 +64,7 @@ export class UserController {
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
+  remove(@Param("id", ParseIntPipe) id: number) {
     return this.userService.remove(+id);
   }
 }

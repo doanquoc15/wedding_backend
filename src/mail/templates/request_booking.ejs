@@ -9,11 +9,11 @@
 
 <body style="font-family: Arial; font-size: 14px">
 <h1>Thanh toán đơn hàng</h1>
-<p>Xin chào, <%= name %></p>
-<p>Cảm ơn bạn đã đặt dịch vụ tại <a href="https://www.abc.com">Sky View Restaurant</a>. Đơn hàng của bạn đã được
-    tiếp nhận và đang được xử lý.</p>
-</p>
-<p>Sau đây là chi tiết đơn hàng của bạn : </p>
+<div>Xin chào, <%= name %></div>
+<div>Cảm ơn bạn đã đặt dịch vụ tại <a href="https://www.abc.com">Sky View Restaurant</a>. Đơn hàng của bạn đã được
+    tiếp nhận và đang được xử lý.</div>
+</div>
+<div>Sau đây là chi tiết đơn hàng của bạn : </div>
 <ul>
     <li>Ngày nhận phòng: <%= toTime %></li>
     </li>
@@ -22,18 +22,18 @@
     <li>Tổng tiền thanh toán : <%= totalMoney %></li>
     <li>Tổng tiền cọc trước : <%= depositMoney %></li>
 </ul>
-<p>Trạng thái </p>
+<div>Trạng thái </div>
 <% if (statusBooking === "PENDING") { %>
-    <p style="color: white; padding: 10px; background-color: red; max-width: fit-content;border-radius: 4px;">Đang chờ
-        duyệt</p>
+    <div style="color: white; padding: 10px; background-color: red; max-width: fit-content;border-radius: 4px;">Đang chờ
+        duyệt</div>
 <% } %>
 
 <% if (statusBooking === "APPROVED") { %>
-    <p style="color: white; padding: 10px; background-color: green;max-width: fit-content;border-radius: 4px;">Đã
-        duyệt</p>
+    <div style="color: white; padding: 10px; background-color: green;max-width: fit-content;border-radius: 4px;">Đã
+        duyệt</div>
 <% } %>
-<p>Cảm ơn!</p>
-<p>Sky View</p>
+<div>Cảm ơn!</div>
+<div>Sky View</div>
 </body>
 
 </html>
