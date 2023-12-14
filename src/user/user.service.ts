@@ -70,11 +70,13 @@ export class UserService {
         role: true,
       },
     });
+    const total = await this.prisma.user.count();
+
     if (!users) {
       throw new NotFoundException(MESSAGE.USER.NOT_FOUND);
     }
 
-    return users;
+    return { users, total };
   }
 
   async findOne(id: number) {

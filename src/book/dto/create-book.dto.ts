@@ -78,4 +78,7 @@ export class CreateBookDto {
   @IsOptional()
   @IsNotEmpty()
   statusPayment: STATUS_PAYMENT;
+
+  @IsNotEmpty()
+  comboItems: any;
 }

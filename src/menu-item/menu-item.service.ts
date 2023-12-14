@@ -1,8 +1,12 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateMenuItemDto } from "./dto/create-menu-item.dto";
 import { UpdateMenuItemDto } from "./dto/update-menu-item.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class MenuItemService {
@@ -19,13 +23,15 @@ export class MenuItemService {
       throw new NotFoundException("typeDish không tồn tại!");
     }
 
-    return await this.prisma.menuItem.create({
+    const type = await this.prisma.menuItem.create({
       data: {
         ...createMenuItemDto,
         price: +createMenuItemDto.price,
-        image: createMenuItemDto.image || undefined,
+        image: createMenuItemDto.image,
       },
     });
+
+    return type;
   }
 
   async findAll(query) {
@@ -54,15 +60,49 @@ export class MenuItemService {
     return { menus, total };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} menuItem`;
+  async findOne(id: number) {
+    const dish = await this.prisma.menuItem.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        typeDish: true,
+      },
+    });
+
+    return dish;
   }
 
-  update(id: number, updateMenuItemDto: UpdateMenuItemDto) {
-    return `This action updates a #${id} menuItem`;
+  async update(id: number, updateMenuItemDto: UpdateMenuItemDto) {
+    const existsDish = await this.prisma.menuItem.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existsDish) {
+      throw new HttpException("Không tìm thâý", HttpStatus.BAD_REQUEST);
+    }
+
+    const updatedDish = await this.prisma.menuItem.update({
+      where: {
+        id,
+      },
+      data: {
+        ...existsDish,
+        ...updateMenuItemDto,
+      },
+    });
+
+    return updatedDish;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} menuItem`;
+  async remove(id: number) {
+    const deletedDish = await this.prisma.menuItem.delete({
+      where: {
+        id,
+      },
+    });
+    return deletedDish;
   }
 }

@@ -6,31 +6,65 @@ import { STATUS_PAYMENT } from "@prisma/client";
 import { MailService } from "src/mail/mail.service";
 import { MESSAGE } from "../common/errors";
 import { GetAllBookDto } from "./dto/get-all-book.dto";
+import { CustomizedComboService } from "../customized-combo/customized-combo.service";
 
 @Injectable()
 export class BookService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mail: MailService,
+    private readonly comboCustomized: CustomizedComboService,
   ) {}
 
   async create(createBookDto: CreateBookDto, userId: number) {
-    const booking = await this.prisma.booking.create({
-      data: {
-        numberTable: createBookDto.numberTable,
-        numberOfGuest: createBookDto.numberOfGuest,
-        comboMenuId: createBookDto.comboMenuId,
-        serviceId: createBookDto.serviceId,
-        zoneId: createBookDto.zoneId,
-        statusBooking: "PENDING",
+    //create booking
+    // const booking = await this.prisma.booking.create({
+    //   data: {
+    //     numberTable: createBookDto.numberTable,
+    //     numberOfGuest: createBookDto.numberOfGuest,
+    //     comboMenuId: createBookDto.comboMenuId,
+    //     serviceId: createBookDto.serviceId,
+    //     zoneId: createBookDto.zoneId,
+    //     statusBooking: "PENDING",
+    //     userId,
+    //     toTime: new Date(createBookDto.toTime),
+    //     comeInAt: new Date(createBookDto.comeInAt),
+    //     comeOutAt: new Date(createBookDto.comeOutAt),
+    //     depositMoney: createBookDto.depositMoney,
+    //     totalMoney: createBookDto.totalMoney,
+    //   },
+    // });
+    //
+    // //create combo menu that users customized
+    // const customizedCombo = await this.comboCustomized.create({
+    //   userId,
+    //   comboMenuId: createBookDto.comboMenuId,
+    //   comboItems: createBookDto.comboItems,
+    // });
+
+    const [booking, customizedCombo] = await Promise.all([
+      this.prisma.booking.create({
+        data: {
+          numberTable: createBookDto.numberTable,
+          numberOfGuest: createBookDto.numberOfGuest,
+          comboMenuId: createBookDto.comboMenuId,
+          serviceId: createBookDto.serviceId,
+          zoneId: createBookDto.zoneId,
+          statusBooking: "PENDING",
+          userId,
+          toTime: new Date(createBookDto.toTime),
+          comeInAt: new Date(createBookDto.comeInAt),
+          comeOutAt: new Date(createBookDto.comeOutAt),
+          depositMoney: createBookDto.depositMoney,
+          totalMoney: createBookDto.totalMoney,
+        },
+      }),
+      await this.comboCustomized.create({
         userId,
-        toTime: new Date(createBookDto.toTime),
-        comeInAt: new Date(createBookDto.comeInAt),
-        comeOutAt: new Date(createBookDto.comeOutAt),
-        depositMoney: createBookDto.depositMoney,
-        totalMoney: createBookDto.totalMoney,
-      },
-    });
+        comboMenuId: createBookDto.comboMenuId,
+        comboItems: createBookDto.comboItems,
+      }),
+    ]);
 
     const admin = await this.prisma.user.findFirst({
       where: {
@@ -57,26 +91,9 @@ export class BookService {
         },
         from: admin.email,
       });
-
-      //send mail to admin
-      // await this.mail.sendMail({
-      //   to: admin.email,
-      //   subject: 'Yêu cầu xác nhận đơn hàng',
-      //   template: 'approved_booking',
-      //   context: {
-      //     name: createBookDto.fullName,
-      //     time: createBookDto.time,
-      //     toTime: createBookDto.toTime,
-      //     depositMoney: createBookDto.depositMoney,
-      //     totalMoney: createBookDto.totalMoney,
-      //     numberTable: createBookDto.numberTable,
-      //     numberOfGuest: createBookDto.numberOfGuest,
-      //   },
-      //   from: createBookDto.email
-      // });
     }
 
-    return booking;
+    return { booking, customizedCombo };
   }
 
   async findAll(query: GetAllBookDto) {
