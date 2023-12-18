@@ -57,7 +57,6 @@ export class NotificationGateway implements OnModuleInit {
   }
 
   async emitNotification(userId: string, notification: CreateNotificationDto) {
-    console.log({ userId }, { notification });
     const socketMeta = this.socketMap.get(userId.toString());
     const notif = await this.notificationService.create(notification);
     if (socketMeta) {

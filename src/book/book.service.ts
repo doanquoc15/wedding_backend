@@ -17,31 +17,6 @@ export class BookService {
   ) {}
 
   async create(createBookDto: CreateBookDto, userId: number) {
-    //create booking
-    // const booking = await this.prisma.booking.create({
-    //   data: {
-    //     numberTable: createBookDto.numberTable,
-    //     numberOfGuest: createBookDto.numberOfGuest,
-    //     comboMenuId: createBookDto.comboMenuId,
-    //     serviceId: createBookDto.serviceId,
-    //     zoneId: createBookDto.zoneId,
-    //     statusBooking: "PENDING",
-    //     userId,
-    //     toTime: new Date(createBookDto.toTime),
-    //     comeInAt: new Date(createBookDto.comeInAt),
-    //     comeOutAt: new Date(createBookDto.comeOutAt),
-    //     depositMoney: createBookDto.depositMoney,
-    //     totalMoney: createBookDto.totalMoney,
-    //   },
-    // });
-    //
-    // //create combo menu that users customized
-    // const customizedCombo = await this.comboCustomized.create({
-    //   userId,
-    //   comboMenuId: createBookDto.comboMenuId,
-    //   comboItems: createBookDto.comboItems,
-    // });
-
     const [booking, customizedCombo] = await Promise.all([
       this.prisma.booking.create({
         data: {
@@ -111,6 +86,18 @@ export class BookService {
               service: true,
             },
           },
+          user: {
+            select: {
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
+          zone: {
+            select: {
+              zoneName: true,
+            },
+          },
         },
       }),
 
@@ -164,7 +151,7 @@ export class BookService {
         ? {
             ...updateBookDto,
             ...booking,
-            statusBooking: updateBookDto.statusBooking,
+            statusBooking: updateBookDto.statusBooking || "PENDING",
             statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
           }
         : {
@@ -173,7 +160,7 @@ export class BookService {
             toTime: new Date(updateBookDto.toTime),
             comeInAt: new Date(updateBookDto.comeInAt),
             comeOutAt: new Date(updateBookDto.comeOutAt),
-            statusBooking: updateBookDto.statusBooking,
+            statusBooking: updateBookDto.statusBooking || "PENDING",
             statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
           };
 
@@ -195,7 +182,12 @@ export class BookService {
     return updatedBooking;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} book`;
+  async remove(id: number) {
+    const deletedBooking = await this.prisma.booking.delete({
+      where: {
+        id,
+      },
+    });
+    return deletedBooking;
   }
 }

@@ -2,13 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { CreateCustomizedComboDto } from "./dto/create-customized-combo.dto";
 import { UpdateCustomizedComboDto } from "./dto/update-customized-combo.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma, STATUS_COMBO } from "@prisma/client";
+import { STATUS_COMBO } from "@prisma/client";
 
 @Injectable()
 export class CustomizedComboService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCustomizedComboDto: CreateCustomizedComboDto) {
+    console.log(createCustomizedComboDto);
     const customComboMenu = await this.prisma.customizedComboMenu.create({
       data: {
         userId: createCustomizedComboDto.userId,

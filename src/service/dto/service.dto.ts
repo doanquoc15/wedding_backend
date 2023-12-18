@@ -1,4 +1,4 @@
-import { IsNumberString, IsOptional } from "class-validator";
+import { IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class GetAllService {
   @IsNumberString()
@@ -8,4 +8,8 @@ export class GetAllService {
   @IsNumberString()
   @IsOptional()
   pageIndex: number | string;
+
+  @IsString()
+  @IsOptional()
+  search: string;
 }

@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateComboMenuDto } from "./dto/create-combo-menu.dto";
-import { UpdateComboMenuDto } from "./dto/update-combo-menu.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import {  STATUS_COMBO } from "@prisma/client";
+import { STATUS_COMBO } from "@prisma/client";
 
 @Injectable()
 export class ComboMenuService {
@@ -35,11 +34,19 @@ export class ComboMenuService {
   }
 
   async findAll(query) {
-    const { pageSize, pageIndex } = query;
+    const { pageSize, pageIndex, search } = query;
     const skip = (+pageIndex - 1) * +pageSize;
-    const take = +pageSize || 5;
+    const take = +pageSize;
 
     const comboMenus = await this.prisma.comboMenu.findMany({
+      where: {
+        comboName: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
       skip: skip || 0,
       take,
       orderBy: {
@@ -97,11 +104,69 @@ export class ComboMenuService {
     return comboMenu;
   }
 
-  update(id: number, updateComboMenuDto: UpdateComboMenuDto) {
-    return `This action updates a #${id} comboMenu`;
+  async update(id, updateComboMenuDto) {
+    const { comboName, description, serviceId, comboItems } =
+      updateComboMenuDto;
+
+    const existingComboMenu = await this.prisma.comboMenu.findUnique({
+      where: {
+        id: +id,
+      },
+      include: {
+        comboItems: true,
+      },
+    });
+
+    if (!existingComboMenu) {
+      // Xử lý khi không tìm thấy combo trong cơ sở dữ liệu
+      throw new Error("Combo not found");
+    }
+
+    // Tính tổng giá mới dựa trên comboItems cần cập nhật
+    const totalPrice = comboItems.reduce(
+      (total, comboItem) => (total += comboItem.totalPrice),
+      0,
+    );
+
+    // Cập nhật thông tin của combo
+    const updatedComboMenu = await this.prisma.comboMenu.update({
+      where: {
+        id: +id,
+      },
+      data: {
+        comboName,
+        totalPrice: +totalPrice,
+        description,
+        serviceId: +serviceId,
+      },
+    });
+
+    // Xóa tất cả các comboItem cũ của combo
+    await this.prisma.comboItem.deleteMany({
+      where: {
+        comboMenuId: +id,
+      },
+    });
+
+    // Tạo lại các comboItem mới
+    await this.prisma.comboItem.createMany({
+      data: comboItems?.map((comboItem) => ({
+        ...comboItem,
+        comboMenuId: +id,
+        totalPrice: +comboItem.totalPrice,
+        status: STATUS_COMBO.AVAILABLE,
+      })),
+    });
+
+    return updatedComboMenu;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} comboMenu`;
+    const deletedComboMenu = this.prisma.comboMenu.delete({
+      where: {
+        id: +id,
+      },
+    });
+    return deletedComboMenu;
   }
 }

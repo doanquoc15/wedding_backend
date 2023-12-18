@@ -6,6 +6,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 @Injectable()
 export class TypeDishService {
   constructor(private readonly prisma: PrismaService) {}
+
   create(createTypeDishDto: CreateTypeDishDto) {
     return this.prisma.typeDish.create({
       data: {
@@ -16,11 +17,11 @@ export class TypeDishService {
 
   async findAll(query) {
     const { pageIndex, pageSize } = query;
-    const skip = (+pageIndex || 1 - 1) * +pageSize;
-    const take = +pageSize || 5;
+    const skip = (+pageIndex - 1) * +pageSize;
+    const take = +pageSize;
 
-    const comboMenus = await this.prisma.typeDish.findMany({
-      skip: skip,
+    const typeDishes = await this.prisma.typeDish.findMany({
+      skip: skip || 0,
       take,
       orderBy: {
         createdAt: "asc",
@@ -34,7 +35,7 @@ export class TypeDishService {
 
     return {
       total,
-      data: comboMenus,
+      typeDishes,
     };
   }
 

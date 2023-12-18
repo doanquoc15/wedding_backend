@@ -225,8 +225,8 @@ model TypeDish {
 model Service {
   id          Int     @id @default(autoincrement())
   serviceName String
-  capacity    Int
   price       Int
+  capacity    Int
   image       String? @default("https://img.freepik.com/free-vector/young-waitress-waiter-object-element-professional-service-restaurant_24797-2133.jpg")
 
   bookings Booking[]

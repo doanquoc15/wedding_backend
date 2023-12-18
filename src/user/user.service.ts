@@ -31,7 +31,6 @@ export class UserService {
       },
     });
     //check exists user by mail
-    console.log(existsUser);
     if (existsUser) {
       throw new ConflictException(MESSAGE.USER.EMAIL_EXISTS);
     }

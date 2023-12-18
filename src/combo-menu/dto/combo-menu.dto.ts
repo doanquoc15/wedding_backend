@@ -1,4 +1,4 @@
-import { IsNumberString, IsOptional } from "class-validator";
+import { IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class GetAllComboMenuDto {
   @IsNumberString()
@@ -8,4 +8,8 @@ export class GetAllComboMenuDto {
   @IsNumberString()
   @IsOptional()
   pageIndex: number | string;
+
+  @IsOptional()
+  @IsString()
+  search: string;
 }

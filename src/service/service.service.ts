@@ -2,27 +2,37 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateServiceDto } from "./dto/create-service.dto";
 import { UpdateServiceDto } from "./dto/update-service.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma } from "@prisma/client";
+import { GetAllService } from "./dto/service.dto";
 
 @Injectable()
 export class ServiceService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createServiceDto: CreateServiceDto) {
-    return await this.prisma.service.create({
+    const createService = await this.prisma.service.create({
       data: {
         ...createServiceDto,
         price: +createServiceDto.price,
       },
     });
+
+    return createService;
   }
 
-  async findAll(query) {
-    const { pageSize, pageIndex } = query;
+  async findAll(query: GetAllService) {
+    const { pageSize, pageIndex, search } = query;
     const skip = (+pageIndex - 1) * +pageSize;
     const take = +pageSize || 5;
 
     const services = await this.prisma.service.findMany({
+      where: {
+        serviceName: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
       skip: skip || 0,
       take,
       orderBy: {
@@ -52,7 +62,7 @@ export class ServiceService {
     });
 
     if (!service) {
-      throw new NotFoundException();
+      throw new NotFoundException("Không ồn tại dịch vụ này!");
     }
 
     return service;
@@ -73,14 +83,17 @@ export class ServiceService {
         id,
       },
       data: {
+        ...existsService,
         ...updateServiceDto,
       },
     });
   }
 
   async remove(id: number) {
-    return await this.prisma.service.delete({
+    const deleteService = await this.prisma.service.delete({
       where: { id },
     });
+
+    return deleteService;
   }
 }
