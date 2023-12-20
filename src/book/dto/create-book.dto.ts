@@ -1,6 +1,5 @@
 import { STATUS_BOOKING, STATUS_PAYMENT } from "@prisma/client";
 import {
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -45,7 +44,6 @@ export class CreateBookDto {
 
   @IsNumber()
   @IsNotEmpty()
-  @IsOptional()
   userId: number;
 
   @IsNumber()
@@ -64,21 +62,11 @@ export class CreateBookDto {
   @IsNotEmpty()
   comboMenuId: number;
 
-  @IsEmail()
-  @IsNotEmpty()
-  @IsOptional()
-  email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  fullName: string;
-
   @IsEnum(STATUS_PAYMENT)
   @IsOptional()
   @IsNotEmpty()
   statusPayment: STATUS_PAYMENT;
 
-  @IsNotEmpty()
+  @IsOptional()
   comboItems: any;
 }

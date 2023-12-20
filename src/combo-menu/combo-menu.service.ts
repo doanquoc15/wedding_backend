@@ -34,12 +34,14 @@ export class ComboMenuService {
   }
 
   async findAll(query) {
-    const { pageSize, pageIndex, search } = query;
+    const { pageSize, pageIndex, search, serviceId } = query;
     const skip = (+pageIndex - 1) * +pageSize;
+    const typeCondition = serviceId ? { serviceId: +serviceId } : {};
     const take = +pageSize;
 
     const comboMenus = await this.prisma.comboMenu.findMany({
       where: {
+        ...typeCondition,
         comboName: search
           ? {
               contains: search,
@@ -77,6 +79,11 @@ export class ComboMenuService {
                 typeDish: true,
               },
             },
+          },
+        },
+        service: {
+          select: {
+            price: true,
           },
         },
       },

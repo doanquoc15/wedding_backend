@@ -93,11 +93,13 @@ export class UserService {
   }
 
   async getMe(userId: number) {
-    return await this.prisma.user.findUnique({
+    const me = await this.prisma.user.findUnique({
       where: {
-        id: userId,
+        id: +userId,
       },
     });
+
+    return me;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

@@ -12,4 +12,8 @@ export class GetAllComboMenuDto {
   @IsOptional()
   @IsString()
   search: string;
+
+  @IsOptional()
+  @IsNumberString()
+  serviceId: string;
 }

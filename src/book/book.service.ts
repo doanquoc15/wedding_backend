@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateBookDto } from "./dto/create-book.dto";
-import { UpdateBookDto } from "./dto/update-book.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { STATUS_PAYMENT } from "@prisma/client";
 import { MailService } from "src/mail/mail.service";
@@ -17,6 +16,27 @@ export class BookService {
   ) {}
 
   async create(createBookDto: CreateBookDto, userId: number) {
+    if (createBookDto?.comboItems?.length === 0) {
+      const customizedCombo = this.prisma.booking.create({
+        data: {
+          numberTable: createBookDto.numberTable,
+          numberOfGuest: createBookDto.numberOfGuest,
+          comboMenuId: createBookDto.comboMenuId,
+          serviceId: createBookDto.serviceId,
+          zoneId: createBookDto.zoneId,
+          statusBooking: "PENDING",
+          userId: createBookDto?.userId || userId,
+          toTime: new Date(createBookDto.toTime),
+          comeInAt: new Date(createBookDto.comeInAt),
+          comeOutAt: new Date(createBookDto.comeOutAt),
+          depositMoney: createBookDto.depositMoney,
+          totalMoney: createBookDto.totalMoney,
+        },
+      });
+
+      return customizedCombo;
+    }
+
     const [booking, customizedCombo] = await Promise.all([
       this.prisma.booking.create({
         data: {
@@ -26,7 +46,7 @@ export class BookService {
           serviceId: createBookDto.serviceId,
           zoneId: createBookDto.zoneId,
           statusBooking: "PENDING",
-          userId,
+          userId: createBookDto?.userId || userId,
           toTime: new Date(createBookDto.toTime),
           comeInAt: new Date(createBookDto.comeInAt),
           comeOutAt: new Date(createBookDto.comeOutAt),
@@ -35,26 +55,32 @@ export class BookService {
         },
       }),
       await this.comboCustomized.create({
-        userId,
+        userId: createBookDto?.userId || userId,
+
         comboMenuId: createBookDto.comboMenuId,
         comboItems: createBookDto.comboItems,
       }),
     ]);
-
     const admin = await this.prisma.user.findFirst({
       where: {
         roleId: 1,
       },
     });
 
+    const userCurrent = await this.prisma.user.findUnique({
+      where: {
+        id: createBookDto?.userId || userId,
+      },
+    });
+
     //send mail to user
     if (booking) {
       await this.mail.sendMail({
-        to: createBookDto.email,
+        to: userCurrent.email,
         subject: "Xác nhận đơn hàng",
         template: "request_booking",
         context: {
-          name: createBookDto.fullName,
+          name: userCurrent.name,
           comeInAt: createBookDto.comeInAt,
           comeOutAt: createBookDto.comeOutAt,
           toTime: createBookDto.toTime,
@@ -72,12 +98,28 @@ export class BookService {
   }
 
   async findAll(query: GetAllBookDto) {
-    const { pageSize, pageIndex } = query;
+    const { pageSize, pageIndex, search, statusBooking, toTime } = query;
     const skip = (Number(pageIndex || 1) - 1) * Number(pageSize || 5) || 0;
     const take = +pageSize || 5;
 
     const [booking, total] = await Promise.all([
       this.prisma.booking.findMany({
+        where: {
+          user: {
+            name: search
+              ? {
+                  contains: search,
+                  mode: "insensitive",
+                }
+              : undefined,
+          },
+          statusBooking: statusBooking ? statusBooking : undefined,
+          toTime: toTime
+            ? {
+                equals: new Date(toTime as string).toISOString(),
+              }
+            : undefined,
+        },
         skip,
         take,
         include: {
@@ -103,7 +145,6 @@ export class BookService {
 
       this.prisma.booking.count(),
     ]);
-
     if (!booking) {
       throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
     }
@@ -111,7 +152,26 @@ export class BookService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} book`;
+    const booking = this.prisma.booking.findUnique({
+      where: {
+        id: +id,
+      },
+      include: {
+        zone: true,
+        comboMenu: {
+          include: {
+            service: true,
+            feedbacks: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
+    }
+
+    return booking;
   }
 
   async findBookingByUserId(id: number) {
@@ -137,48 +197,45 @@ export class BookService {
     return bookingByUser;
   }
 
-  async update(id: number, updateBookDto: UpdateBookDto) {
-    const booking = await this.prisma.booking.findUnique({
+  async update(id: number, updateBookDto) {
+    const existingBooking = await this.prisma.booking.findUnique({
       where: {
-        id,
+        id: id,
       },
     });
 
-    const data =
-      !updateBookDto.toTime &&
-      !updateBookDto.comeInAt &&
-      !updateBookDto.comeOutAt
-        ? {
-            ...updateBookDto,
-            ...booking,
-            statusBooking: updateBookDto.statusBooking || "PENDING",
-            statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
-          }
-        : {
-            ...updateBookDto,
-            ...booking,
-            toTime: new Date(updateBookDto.toTime),
-            comeInAt: new Date(updateBookDto.comeInAt),
-            comeOutAt: new Date(updateBookDto.comeOutAt),
-            statusBooking: updateBookDto.statusBooking || "PENDING",
-            statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
-          };
-
-    const updatedBooking = this.prisma.booking.update({
-      where: {
-        id,
-      },
-      data: {
-        ...updateBookDto,
-        ...booking,
-        ...data,
-      },
-    });
-
-    if (!updatedBooking) {
+    if (!existingBooking) {
       throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
     }
 
+    const updatedBooking = await this.prisma.booking.update({
+      where: {
+        id: id,
+      },
+      data: {
+        userId: updateBookDto.userId || existingBooking.userId,
+        numberTable: updateBookDto.numberTable || existingBooking.numberTable,
+        numberOfGuest:
+          updateBookDto.numberOfGuest || existingBooking.numberOfGuest,
+        comboMenuId: updateBookDto.comboMenuId || existingBooking.comboMenuId,
+        serviceId: updateBookDto.serviceId || existingBooking.serviceId,
+        zoneId: updateBookDto.zoneId || existingBooking.zoneId,
+        toTime: updateBookDto.toTime
+          ? new Date(updateBookDto.toTime)
+          : existingBooking.toTime,
+        comeInAt: updateBookDto.comeInAt
+          ? new Date(updateBookDto.comeInAt)
+          : existingBooking.comeInAt,
+        comeOutAt: updateBookDto.comeOutAt
+          ? new Date(updateBookDto.comeOutAt)
+          : existingBooking.comeOutAt,
+        depositMoney:
+          updateBookDto.depositMoney || existingBooking.depositMoney,
+        totalMoney: updateBookDto.totalMoney || existingBooking.totalMoney,
+        statusBooking: updateBookDto.statusBooking || "PENDING",
+        statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
+      },
+    });
     return updatedBooking;
   }
 
