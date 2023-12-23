@@ -12,15 +12,17 @@ export class CreateNotificationDto {
   title: string;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  link: string;
 
   @IsString()
-  @IsOptional()
-  image: string;
+  description: string;
 
   @IsBoolean()
+  @IsOptional()
   isRead: boolean;
 
+  @IsOptional()
   @IsEnum(TYPE_NOTIFICATION)
   type: TYPE_NOTIFICATION;
 

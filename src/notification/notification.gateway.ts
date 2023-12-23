@@ -3,9 +3,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
+import { OnModuleInit } from "@nestjs/common";
+
 import { NotificationService } from "./notification.service";
 import { Server, Socket } from "socket.io";
-import { OnModuleInit } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
 
@@ -17,7 +18,7 @@ interface JwtPayload {
   exp?: number;
 }
 
-export interface socketMetaPayload {
+interface SocketMetaPayload {
   socketId: string;
   userId: number;
 }
@@ -30,7 +31,7 @@ export interface socketMetaPayload {
 export class NotificationGateway implements OnModuleInit {
   @WebSocketServer()
   server: Server;
-  socketMap = new Map<string, socketMetaPayload>();
+  socketMap = new Map<string, SocketMetaPayload>();
 
   constructor(
     private readonly notificationService: NotificationService,
@@ -38,32 +39,40 @@ export class NotificationGateway implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.server.on("connection", async (socket) => {
-      socket.on("join", (userId) => {
-        this.socketMap.set(userId, {
-          socketId: socket.id.toString(),
-          userId: +userId,
-        });
-
+    this.server.on("connection", async (socket: Socket) => {
+      socket.on("join", (userId: number) => {
         if (!userId) {
           socket.disconnect(true);
-          return true;
+          return;
         }
+        this.socketMap.set(socket.id, {
+          socketId: socket.id,
+          userId: userId,
+        });
       });
+
       socket.on("disconnect", () => {
         this.socketMap.delete(socket.id);
       });
     });
   }
 
-  async emitNotification(userId: string, notification: CreateNotificationDto) {
-    const socketMeta = this.socketMap.get(userId.toString());
-    const notif = await this.notificationService.create(notification);
-    if (socketMeta) {
-      this.server.to(socketMeta?.socketId).emit("notification", notif);
+  async emitNotification(userId: number, notification: CreateNotificationDto) {
+    const socketId = this.getUserSocketId(userId);
+    if (socketId) {
+      const notif = await this.notificationService.create(notification);
+      this.server.to(socketId).emit("notification", notif);
     } else {
-      throw new Error("user is not online at the moment!");
+      throw new Error("User is not online at the moment!");
     }
+  }
+
+  async increaseBadge(value = 1) {
+    this.server.emit("increaseBadges", value);
+  }
+
+  async updateBadges(authorId) {
+    this.server.emit("updateBadge", authorId);
   }
 
   @SubscribeMessage("currentUsers")
@@ -71,19 +80,55 @@ export class NotificationGateway implements OnModuleInit {
     client.emit("currentUsers", Array.from(this.socketMap.values()));
   }
 
-  //event name: "getNotificationsById"
   @SubscribeMessage("getNotificationsById")
   async getNotificationsById(client: Socket, userId: number) {
-    const notifications = await this.notificationService.findAllByUser(+userId);
+    const notifications = await this.notificationService.findAllByUser(userId);
     client.emit("getNotificationsById", notifications);
   }
 
-  //event name: "updatedRead"
   @SubscribeMessage("updatedRead")
   async updatedRead(client: Socket, notificationId: number) {
-    const notification = await this.notificationService.updatedRead(
-      notificationId,
+    const notification = await this.notificationService.updated(
+      +notificationId,
+      { isRead: true },
     );
     client.emit("updatedRead", notification);
+  }
+
+  @SubscribeMessage("createNotification")
+  async createNotification(client: Socket, notificationData: any) {
+    const notification = await this.notificationService.create({
+      ...notificationData,
+    });
+    client.emit("createNotification", notification);
+  }
+
+  @SubscribeMessage("updateBadge")
+  async updateBadge(client: Socket, authorId: number) {
+    client.emit("updateBadge", authorId);
+  }
+
+  @SubscribeMessage("increaseBadges")
+  async onIncreaseBadges(client: Socket, value = 1) {
+    client.emit("increaseBadges", value);
+  }
+
+  @SubscribeMessage("orderStatusUpdated")
+  async orderStatusUpdated(client: Socket, data: any) {
+    const { userId, orderId, status } = data;
+
+    const socketId = this.getUserSocketId(userId);
+    if (socketId) {
+      this.server.to(socketId).emit("orderStatusUpdated", { orderId, status });
+    } else {
+      throw new Error("User is not online at the moment!");
+    }
+  }
+
+  private getUserSocketId(userId: number): string | undefined {
+    const userSocket = Array.from(this.socketMap.values()).find(
+      (socketMeta) => socketMeta.userId === userId,
+    );
+    return userSocket?.socketId;
   }
 }

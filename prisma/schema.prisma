@@ -256,7 +256,6 @@ model Notification {
   id          Int               @id @default(autoincrement())
   title       String
   description String
-  image       String?
   userId      Int
   user        User              @relation(fields: [userId], references: [id])
   isRead      Boolean           @default(false)

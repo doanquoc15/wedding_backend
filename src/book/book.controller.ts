@@ -46,6 +46,11 @@ export class BookController {
     return this.bookService.update(+id, updateBookDto);
   }
 
+  @Patch("/status/:id")
+  updateStatus(@Param("id") id: string, @Body() statusBooking) {
+    return this.bookService.updateStatus(+id, statusBooking);
+  }
+
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.bookService.remove(+id);

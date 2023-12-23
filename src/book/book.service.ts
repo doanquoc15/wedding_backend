@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateBookDto } from "./dto/create-book.dto";
 import { PrismaService } from "src/prisma/prisma.service";
-import { STATUS_PAYMENT } from "@prisma/client";
+import { STATUS_PAYMENT, TYPE_NOTIFICATION } from "@prisma/client";
 import { MailService } from "src/mail/mail.service";
 import { MESSAGE } from "../common/errors";
 import { GetAllBookDto } from "./dto/get-all-book.dto";
 import { CustomizedComboService } from "../customized-combo/customized-combo.service";
+import { NotificationGateway } from "../notification/notification.gateway";
+import { NotificationService } from "../notification/notification.service";
 
 @Injectable()
 export class BookService {
@@ -13,6 +15,8 @@ export class BookService {
     private readonly prisma: PrismaService,
     private readonly mail: MailService,
     private readonly comboCustomized: CustomizedComboService,
+    private readonly notificationGateway: NotificationGateway,
+    private readonly notification: NotificationService,
   ) {}
 
   async create(createBookDto: CreateBookDto, userId: number) {
@@ -237,6 +241,36 @@ export class BookService {
       },
     });
     return updatedBooking;
+  }
+
+  async updateStatus(id: number, statusBooking) {
+    const STATUS = {
+      PENDING: "tab=0",
+      APPROVED: "tab=1",
+      REJECTED: "tab=3",
+    };
+    const updateStatusBooking = await this.prisma.booking.update({
+      where: {
+        id: id,
+      },
+      data: {
+        statusBooking: statusBooking.statusBooking,
+      },
+    });
+
+    const createNotification = await this.notification.create({
+      userId: updateStatusBooking?.userId,
+      description: `Đơn hàng ${updateStatusBooking.id} của bạn đã được cập nhật trạng thái thành ${updateStatusBooking.statusBooking}`,
+      title: "Cập nhật đơn hàng",
+      isRead: false,
+      type: TYPE_NOTIFICATION.INFO,
+      link: `https://wedding-frontend-seven.vercel.app/tai-khoan/lich-su?${
+        STATUS[updateStatusBooking.statusBooking]
+      }`,
+    });
+    await this.notificationGateway.updateBadges(createNotification?.userId);
+
+    return updateStatusBooking;
   }
 
   async remove(id: number) {
