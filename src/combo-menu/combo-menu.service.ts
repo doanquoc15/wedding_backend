@@ -37,7 +37,7 @@ export class ComboMenuService {
     const { pageSize, pageIndex, search, serviceId } = query;
     const skip = (+pageIndex - 1) * +pageSize;
     const typeCondition = serviceId ? { serviceId: +serviceId } : {};
-    const take = +pageSize;
+    const take = +pageSize || 5;
 
     const comboMenus = await this.prisma.comboMenu.findMany({
       where: {
@@ -72,6 +72,12 @@ export class ComboMenuService {
     const comboMenu = await this.prisma.comboMenu.findUnique({
       where: { id: +id },
       include: {
+        customizedComboMenus: {
+          include: {
+            comboItems: true,
+            comboMenu: true,
+          },
+        },
         comboItems: {
           include: {
             menuItem: {

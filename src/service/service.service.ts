@@ -12,6 +12,7 @@ export class ServiceService {
     const createService = await this.prisma.service.create({
       data: {
         ...createServiceDto,
+        image: createServiceDto.image || undefined,
         price: +createServiceDto.price,
       },
     });

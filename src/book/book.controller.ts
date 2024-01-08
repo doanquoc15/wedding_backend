@@ -31,9 +31,24 @@ export class BookController {
     return this.bookService.findAll(query);
   }
 
+  @Get("/percent")
+  getPercentBooking(@Query() query: GetAllBookDto) {
+    return this.bookService.percentBooking(query);
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.bookService.findOne(+id);
+  }
+
+  @Get("/food/:id")
+  findFood(@Param("id") id: string) {
+    return this.bookService.findFood(+id);
+  }
+
+  @Get("/check-custom/:id")
+  checkBookingCustom(@Param("id") id: string) {
+    return this.bookService.checkBookingCustom(+id);
   }
 
   @Get("/user/:id")
@@ -49,6 +64,11 @@ export class BookController {
   @Patch("/status/:id")
   updateStatus(@Param("id") id: string, @Body() statusBooking) {
     return this.bookService.updateStatus(+id, statusBooking);
+  }
+
+  @Patch("/payment/:id")
+  updatePayment(@Param("id") id: string, @Body() statusPayment) {
+    return this.bookService.updatePayment(+id, statusPayment);
   }
 
   @Delete(":id")

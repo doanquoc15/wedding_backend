@@ -16,11 +16,19 @@ export class TypeDishService {
   }
 
   async findAll(query) {
-    const { pageIndex, pageSize } = query;
+    const { pageIndex, pageSize, search } = query;
     const skip = (+pageIndex - 1) * +pageSize;
-    const take = +pageSize;
+    const take = +pageSize || 5;
 
     const typeDishes = await this.prisma.typeDish.findMany({
+      where: {
+        typeName: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
       skip: skip || 0,
       take,
       orderBy: {
@@ -31,7 +39,7 @@ export class TypeDishService {
       },
     });
 
-    const total = await this.prisma.service.count();
+    const total = await this.prisma.typeDish.count();
 
     return {
       total,
@@ -60,12 +68,13 @@ export class TypeDishService {
       throw new NotFoundException();
     }
 
-    return await this.prisma.typeDish.update({
+    const updated = await this.prisma.typeDish.update({
       where: { id },
       data: {
         ...updateTypeDishDto,
       },
     });
+    return updated;
   }
 
   async remove(id: number) {

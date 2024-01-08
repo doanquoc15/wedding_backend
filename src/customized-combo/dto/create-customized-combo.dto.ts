@@ -15,6 +15,10 @@ export class CreateCustomizedComboDto {
   @IsNotEmpty()
   comboMenuId: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  bookingId: number;
+
   @IsArray()
   @IsOptional()
   comboItems: ComboItem[];

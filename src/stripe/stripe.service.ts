@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
 @Injectable()
 export class StripeService {
@@ -13,23 +13,23 @@ export class StripeService {
   }
 
   async checkout(cart: any) {
-     const lineItems = cart?.map((item)=>({
-        price_data:{
-            currency:"usd",
-            product_data:{
-                name:item.name,
-            },
-            unit_amount:item.price * 100,
+    const lineItems = cart?.map((item) => ({
+      price_data: {
+        currency: "vnd",
+        product_data: {
+          name: item.name,
         },
-        quantity : cart.quantity || 1,
+        unit_amount: item.price * 100,
+      },
+      quantity: cart.quantity || 1,
     }));
 
     const session = await this.stripe.checkout.sessions.create({
-        payment_method_types:["card"],
-        line_items:lineItems,
-        mode:"payment",
-        success_url:`${process.env.YOUR_DOMAIN}/success`,
-        cancel_url:`${process.env.YOUR_DOMAIN}/cancel`,
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: `${process.env.YOUR_DOMAIN}/success`,
+      cancel_url: `${process.env.YOUR_DOMAIN}/cancel`,
     });
 
     return session;

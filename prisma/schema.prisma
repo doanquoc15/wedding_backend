@@ -51,6 +51,7 @@ model Role {
 model Zone {
   id         Int    @id @default(autoincrement())
   zoneName   String
+  priceRent  Int?
   numberRoom Int
 
   bookings Booking[]
@@ -112,10 +113,12 @@ model Booking {
   comboMenuId Int
   comboMenu   ComboMenu @relation(fields: [comboMenuId], references: [id])
 
+  customizedComboMenu CustomizedComboMenu?
+
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId Int
 
-  statusBooking STATUS_BOOKING @default(PENDING)
+  statusBooking STATUS_BOOKING @default(NEW)
 
   statusPayment STATUS_PAYMENT @default(UNPAID)
 
@@ -162,6 +165,9 @@ model CustomizedComboMenu {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  bookingId Int     @unique
 
   @@map("customized_combo_menus")
 }
@@ -210,8 +216,9 @@ model MenuItem {
 
 // 11
 model TypeDish {
-  id       Int    @id @default(autoincrement())
-  typeName String
+  id          Int     @id @default(autoincrement())
+  typeName    String
+  description String?
 
   menuItems MenuItem[]
 
@@ -296,12 +303,15 @@ enum STATUS_COMBO {
 }
 
 enum STATUS_BOOKING {
-  APPROVED
+  NEW
   PENDING
+  APPROVED
+  FINISHED
   REJECTED
 }
 
 enum STATUS_PAYMENT {
+  DEPOSIT
   PAID
   UNPAID
 }

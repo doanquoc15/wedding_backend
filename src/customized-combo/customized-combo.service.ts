@@ -11,6 +11,7 @@ export class CustomizedComboService {
   async create(createCustomizedComboDto: CreateCustomizedComboDto) {
     const customComboMenu = await this.prisma.customizedComboMenu.create({
       data: {
+        bookingId: +createCustomizedComboDto.bookingId,
         userId: createCustomizedComboDto.userId,
         comboMenuId: createCustomizedComboDto.comboMenuId,
       },

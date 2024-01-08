@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { MESSAGE } from "src/common/errors";
 import { ChangePasswordDto } from "./dto/change-password.dto";
@@ -102,7 +101,7 @@ export class UserService {
     return me;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto) {
     if (!id) {
       throw new NotFoundException(MESSAGE.USER.NOT_FOUND);
     }
@@ -117,12 +116,15 @@ export class UserService {
       throw new NotFoundException(MESSAGE.USER.NOT_FOUND);
     }
 
+    delete updateUserDto?.province;
+    delete updateUserDto?.district;
+    delete updateUserDto?.ward;
+
     const updateUser = await this.prisma.user.update({
       where: {
         id: id,
       },
       data: {
-        ...user,
         ...updateUserDto,
         dateOfBirth: updateUserDto?.dateOfBirth
           ? new Date(updateUserDto?.dateOfBirth)
