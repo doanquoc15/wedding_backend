@@ -12,7 +12,7 @@ export class FeedbackService {
       data: {
         ...createFeedbackDto,
         userId: createFeedbackDto.userId,
-        comboMenuId: createFeedbackDto.comboMenuId,
+        bookingId: createFeedbackDto.bookingId,
         rating: createFeedbackDto.rating,
         comment: createFeedbackDto.comment,
       },
@@ -28,7 +28,21 @@ export class FeedbackService {
   async findOne(id: number) {
     const feedback = await this.prisma.feedback.findMany({
       where: {
-        comboMenuId: +id,
+        id: +id,
+      },
+    });
+
+    if (!feedback) {
+      throw new NotFoundException("Không tìm tấy đánh gi nào cho dịch vụ này");
+    }
+
+    return feedback;
+  }
+
+  async findBookingId(id: number) {
+    const feedback = await this.prisma.feedback.findMany({
+      where: {
+        bookingId: +id,
       },
     });
 
@@ -40,7 +54,16 @@ export class FeedbackService {
   }
 
   update(id: number, updateFeedbackDto: UpdateFeedbackDto) {
-    return `This action updates a #${id} feedback`;
+    const updatedFeedback = this.prisma.feedback.update({
+      where: {
+        id: +id,
+      },
+      data: {
+        ...updateFeedbackDto,
+      },
+    });
+
+    return updatedFeedback;
   }
 
   remove(id: number) {

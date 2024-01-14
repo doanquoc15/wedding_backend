@@ -92,6 +92,12 @@ export class ComboMenuService {
             price: true,
           },
         },
+        bookings: {
+          include: {
+            feedback: true,
+            user: true,
+          },
+        },
       },
     });
 
@@ -109,6 +115,12 @@ export class ComboMenuService {
         comboItems: {
           include: {
             menuItem: true,
+          },
+        },
+        bookings: {
+          include: {
+            feedback: true,
+            user: true,
           },
         },
       },

@@ -41,7 +41,11 @@ export class ServiceService {
       },
       include: {
         comboMenus: true,
-        bookings: true,
+        bookings: {
+          include: {
+            feedback: true,
+          },
+        },
       },
     });
 

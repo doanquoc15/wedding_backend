@@ -7,7 +7,7 @@ export class CreateFeedbackDto {
 
   @IsNumber()
   @IsNotEmpty()
-  comboMenuId: number;
+  bookingId: number;
 
   @IsNumber()
   @IsNotEmpty()

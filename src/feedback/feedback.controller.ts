@@ -1,9 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { FeedbackService } from './feedback.service';
-import { CreateFeedbackDto } from './dto/create-feedback.dto';
-import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from "@nestjs/common";
+import { FeedbackService } from "./feedback.service";
+import { CreateFeedbackDto } from "./dto/create-feedback.dto";
+import { UpdateFeedbackDto } from "./dto/update-feedback.dto";
 
-@Controller('feedback')
+@Controller("feedback")
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
@@ -17,18 +25,26 @@ export class FeedbackController {
     return this.feedbackService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(":id")
+  findOne(@Param("id") id: string) {
     return this.feedbackService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFeedbackDto: UpdateFeedbackDto) {
+  @Get("/booking/:id")
+  findBookingId(@Param("id") id: string) {
+    return this.feedbackService.findBookingId(+id);
+  }
+
+  @Patch(":id")
+  update(
+    @Param("id") id: string,
+    @Body() updateFeedbackDto: UpdateFeedbackDto,
+  ) {
     return this.feedbackService.update(+id, updateFeedbackDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id") id: string) {
     return this.feedbackService.remove(+id);
   }
 }

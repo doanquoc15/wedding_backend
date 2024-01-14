@@ -23,77 +23,6 @@ export class BookService {
     private readonly notification: NotificationService,
   ) {}
 
-  // async create(createBookDto: CreateBookDto, userId: number) {
-  //   const data = {
-  //     numberTable: createBookDto.numberTable,
-  //     numberOfGuest: createBookDto.numberOfGuest,
-  //     comboMenuId: createBookDto.comboMenuId,
-  //     serviceId: createBookDto.serviceId,
-  //     zoneId: createBookDto.zoneId,
-  //     statusBooking: STATUS_BOOKING.NEW,
-  //     userId: createBookDto?.userId || userId,
-  //     toTime: new Date(createBookDto.toTime),
-  //     comeInAt: new Date(createBookDto.comeInAt),
-  //     comeOutAt: new Date(createBookDto.comeOutAt),
-  //     depositMoney: createBookDto.depositMoney,
-  //     totalMoney: createBookDto.totalMoney,
-  //   };
-  //
-  //   if (createBookDto?.comboItems?.length === 0) {
-  //     const customizedCombo = await this.prisma.booking.create({
-  //       data: { ...data },
-  //     });
-  //     return customizedCombo;
-  //   }
-  //
-  //   const [booking, customizedCombo] = await Promise.all([
-  //     await this.prisma.booking.create({
-  //       data: {
-  //         ...data,
-  //       },
-  //     }),
-  //     await this.comboCustomized.create({
-  //       userId: createBookDto?.userId || userId,
-  //       comboMenuId: createBookDto.comboMenuId,
-  //       comboItems: createBookDto.comboItems,
-  //     }),
-  //   ]);
-  //
-  //   const admin = await this.prisma.user.findFirst({
-  //     where: {
-  //       roleId: 1,
-  //     },
-  //   });
-  //
-  //   const userCurrent = await this.prisma.user.findUnique({
-  //     where: {
-  //       id: createBookDto?.userId || userId,
-  //     },
-  //   });
-  //
-  //   //send mail to user
-  //   if (booking) {
-  //     await this.mail.sendMail({
-  //       to: userCurrent.email,
-  //       subject: "Xác nhận đơn hàng",
-  //       template: "request_booking",
-  //       context: {
-  //         name: userCurrent.name,
-  //         comeInAt: createBookDto.comeInAt,
-  //         comeOutAt: createBookDto.comeOutAt,
-  //         toTime: createBookDto.toTime,
-  //         depositMoney: createBookDto.depositMoney,
-  //         totalMoney: createBookDto.totalMoney,
-  //         statusBooking: STATUS_BOOKING.NEW,
-  //         numberTable: createBookDto.numberTable,
-  //         numberOfGuest: createBookDto.numberOfGuest,
-  //       },
-  //       from: admin.email,
-  //     });
-  //   }
-  //
-  //   return { booking, customizedCombo };
-  // }
   async create(createBookDto: CreateBookDto, userId: number) {
     const data = {
       numberTable: createBookDto.numberTable,
@@ -263,7 +192,6 @@ export class BookService {
         comboMenu: {
           include: {
             service: true,
-            feedbacks: true,
           },
         },
       },
@@ -367,7 +295,6 @@ export class BookService {
         comboMenu: {
           include: {
             service: true,
-            feedbacks: true,
           },
         },
       },
