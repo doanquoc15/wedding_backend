@@ -24,6 +24,17 @@ export class BookService {
   ) {}
 
   async create(createBookDto: CreateBookDto, userId: number) {
+    const userCurrent = await this.prisma.user.findUnique({
+      where: {
+        id: createBookDto?.userId || userId,
+      },
+    });
+
+    const admin = await this.prisma.user.findFirst({
+      where: {
+        roleId: 1,
+      },
+    });
     const data = {
       numberTable: createBookDto.numberTable,
       numberOfGuest: createBookDto.numberOfGuest,
@@ -43,18 +54,6 @@ export class BookService {
       // Đơn hàng không có comboItems, tạo đơn hàng thông thường
       const booking = await this.prisma.booking.create({
         data: { ...data },
-      });
-
-      const userCurrent = await this.prisma.user.findUnique({
-        where: {
-          id: createBookDto?.userId || userId,
-        },
-      });
-
-      const admin = await this.prisma.user.findFirst({
-        where: {
-          roleId: 1,
-        },
       });
 
       // Gửi email xác nhận đơn hàng
@@ -78,11 +77,31 @@ export class BookService {
         });
       }
 
-      return { booking };
+      return booking;
     } else {
       const booking = await this.prisma.booking.create({
         data: { ...data },
       });
+
+      if (booking) {
+        await this.mail.sendMail({
+          to: userCurrent.email,
+          subject: "Xác nhận đơn hàng",
+          template: "request_booking",
+          context: {
+            name: userCurrent.name,
+            comeInAt: createBookDto.comeInAt,
+            comeOutAt: createBookDto.comeOutAt,
+            toTime: createBookDto.toTime,
+            depositMoney: createBookDto.depositMoney,
+            totalMoney: createBookDto.totalMoney,
+            statusBooking: STATUS_BOOKING.NEW,
+            numberTable: createBookDto.numberTable,
+            numberOfGuest: createBookDto.numberOfGuest,
+          },
+          from: admin.email,
+        });
+      }
 
       const customizedCombo = this.comboCustomized.create({
         bookingId: booking.id,
@@ -212,6 +231,7 @@ export class BookService {
         statusPayment: true,
         toTime: true,
         comeInAt: true,
+        depositMoney: true,
       },
     });
 
@@ -305,6 +325,39 @@ export class BookService {
     }
 
     return bookingByUser;
+  }
+
+  async getFinishedOrdersByMonth(
+    year?: number | string,
+  ): Promise<{ month: number; quantity: number }[]> {
+    const currentYear = year || new Date().getFullYear();
+
+    const finishedOrders = await this.prisma.booking.findMany({
+      where: {
+        statusBooking: "FINISHED",
+        updatedAt: {
+          gte: new Date(`${currentYear}-01-01`),
+          lt: new Date(`${+currentYear + 1}-01-01`),
+        },
+      },
+      select: {
+        updatedAt: true,
+      },
+    });
+
+    const result: { [month: number]: number } = {};
+
+    finishedOrders.forEach((order) => {
+      const monthNumber = new Date(order.updatedAt).getMonth() + 1;
+      result[monthNumber] = (result[monthNumber] || 0) + 1;
+    });
+
+    const sortedResult = Array.from({ length: 12 }, (_, index) => ({
+      month: index + 1,
+      quantity: result[index + 1] || 0,
+    }));
+
+    return sortedResult;
   }
 
   async update(id: number, updateBookDto) {

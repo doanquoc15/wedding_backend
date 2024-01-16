@@ -1,6 +1,7 @@
 import {
   ConflictException,
   ForbiddenException,
+  HttpException,
   Injectable,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -11,8 +12,8 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { AuthDto, SignInDto } from "./dto";
 import { JwtPayload, Tokens } from "./types";
 import { PrismaService } from "../prisma/prisma.service";
-import { MESSAGE, httpStatus } from "src/common/errors";
-import { ROLE } from "@prisma/client";
+import { httpStatus, MESSAGE } from "src/common/errors";
+import { ROLE, STATUS_USER } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -41,7 +42,6 @@ export class AuthService {
         id: true,
       },
     });
-
 
     const hash = await argon.hash(dto.password);
 
@@ -75,6 +75,9 @@ export class AuthService {
         role: true,
       },
     });
+
+    if (user?.status === STATUS_USER.INACTIVE)
+      throw new HttpException("Tài khoản đã bị khóa", 403);
 
     if (!user) throw new ForbiddenException(MESSAGE.AUTH.ACCESS_DENIED);
 
