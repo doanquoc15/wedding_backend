@@ -31,8 +31,13 @@ export class MenuItemController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  findOne(@Param("id") id?: string) {
     return this.menuItemService.findOne(+id);
+  }
+
+  @Get("/top/:top")
+  getTop(@Param("top") top: string) {
+    return this.menuItemService.getTop(+top);
   }
 
   @Patch(":id")

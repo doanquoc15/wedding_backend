@@ -9,16 +9,15 @@ import { JwtModule } from "@nestjs/jwt";
 import { MenuItemModule } from "./menu-item/menu-item.module";
 import { ServiceModule } from "./service/service.module";
 import { TypeDishModule } from "./type-dish/type-dish.module";
-import { EmployeeModule } from "./employee/employee.module";
 import { ComboMenuModule } from "./combo-menu/combo-menu.module";
 import { StripeModule } from "./stripe/stripe.module";
-import { CustomizedComboModule } from './customized-combo/customized-combo.module';
-import { ZoneModule } from './zone/zone.module';
-import { MailModule } from './mail/mail.module';
-import { BookModule } from './book/book.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { FeedbackModule } from './feedback/feedback.module';
-import { NotificationModule } from './notification/notification.module';
+import { CustomizedComboModule } from "./customized-combo/customized-combo.module";
+import { ZoneModule } from "./zone/zone.module";
+import { MailModule } from "./mail/mail.module";
+import { BookModule } from "./book/book.module";
+import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { FeedbackModule } from "./feedback/feedback.module";
+import { NotificationModule } from "./notification/notification.module";
 
 @Module({
   imports: [
@@ -33,7 +32,6 @@ import { NotificationModule } from './notification/notification.module';
     MenuItemModule,
     ServiceModule,
     TypeDishModule,
-    EmployeeModule,
     ComboMenuModule,
     StripeModule,
     CustomizedComboModule,
@@ -53,6 +51,6 @@ import { NotificationModule } from './notification/notification.module';
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
     },
-   ],
+  ],
 })
 export class AppModule {}

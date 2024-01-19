@@ -73,6 +73,18 @@ export class MenuItemService {
     return dish;
   }
 
+  async getTop(top?: number) {
+    const topNewestDishes = await this.prisma.menuItem.findMany({
+      take: top || 5, // Convert topN to a number
+      orderBy: { createdAt: "desc" },
+      include: {
+        typeDish: true,
+      },
+    });
+
+    return topNewestDishes;
+  }
+
   async update(id: number, updateMenuItemDto: UpdateMenuItemDto) {
     const existsDish = await this.prisma.menuItem.findUnique({
       where: {
