@@ -96,6 +96,9 @@ export class UserService {
       where: {
         id: +userId,
       },
+      include: {
+        role: true,
+      },
     });
 
     return me;

@@ -331,24 +331,24 @@ export class BookService {
     year?: number | string,
   ): Promise<{ month: number; quantity: number }[]> {
     const currentYear = year || new Date().getFullYear();
-
+    console.log(currentYear);
     const finishedOrders = await this.prisma.booking.findMany({
       where: {
         statusBooking: "FINISHED",
-        updatedAt: {
-          gte: new Date(`${currentYear}-01-01`),
-          lt: new Date(`${+currentYear + 1}-01-01`),
+        toTime: {
+          gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+          lt: new Date(`${+currentYear + 1}-01-01T00:00:00.000Z`),
         },
       },
       select: {
-        updatedAt: true,
+        toTime: true,
       },
     });
 
     const result: { [month: number]: number } = {};
 
     finishedOrders.forEach((order) => {
-      const monthNumber = new Date(order.updatedAt).getMonth() + 1;
+      const monthNumber = new Date(order.toTime).getMonth() + 1;
       result[monthNumber] = (result[monthNumber] || 0) + 1;
     });
 
@@ -446,6 +446,82 @@ export class BookService {
 
     return updatePaymentBooking;
   }
+
+  async getBookingStatusByMonth(year: string) {
+    const currentYear = +year || new Date().getFullYear();
+    console.log(currentYear);
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        toTime: {
+          gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+          lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+        },
+      },
+      select: {
+        id: true,
+        toTime: true,
+        statusBooking: true,
+      },
+    });
+
+    const result: Record<string, Record<string, number>> = {};
+
+    for (let month = 1; month <= 12; month++) {
+      result[month] = {
+        NEW: 0,
+        PENDING: 0,
+        APPROVED: 0,
+        FINISHED: 0,
+        REJECTED: 0,
+      };
+    }
+
+    bookings.forEach((booking) => {
+      const month = booking.toTime.getMonth() + 1; // Months are zero-based
+      const status = booking.statusBooking;
+
+      result[month][status]++;
+    });
+
+    const formattedResult = Object.keys(result).map((month) => ({
+      month: +month,
+      ...result[month],
+    }));
+
+    return formattedResult;
+  }
+
+  // async getBookingStatusByMonth(year?: string): Promise<any[]> {
+  //   const statuses = ["NEW", "PENDING", "APPROVED", "FINISHED", "REJECTED"];
+  //   const currentYear = +year || new Date().getFullYear();
+  //
+  //   const bookingsByMonth = await Promise.all(
+  //     Array.from({ length: 12 }, (_, i) => i + 1).map(async (month) => {
+  //       const bookings = await this.prisma.booking.findMany({
+  //         where: {
+  //           toTime: {
+  //             gte: new Date(`${currentYear}-01-01`),
+  //             lt: new Date(`${+currentYear + 1}-01-01`),
+  //           },
+  //         },
+  //       });
+  //
+  //       const statusCounts = {};
+  //       statuses.forEach((status) => {
+  //         statusCounts[status.toLowerCase()] = bookings.filter(
+  //           (booking) => booking.statusBooking === status,
+  //         ).length;
+  //       });
+  //
+  //       return {
+  //         month,
+  //         ...statusCounts,
+  //       };
+  //     }),
+  //   );
+  //
+  //   return bookingsByMonth;
+  // }
 
   async findFood(bookingId) {
     const data = await this.prisma.customizedComboMenu.findUnique({

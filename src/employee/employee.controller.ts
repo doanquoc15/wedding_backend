@@ -1,18 +1,18 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
 } from "@nestjs/common";
 import { EmployeeService } from "./employee.service";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
 import { EmployeeDto } from "./dto/EmployeeDto.dto";
-import { Public } from "src/common/decorators";
+import { Public } from "../common/decorators";
 
 @Controller("employee")
 export class EmployeeController {
@@ -30,6 +30,7 @@ export class EmployeeController {
   }
 
   @Get(":id")
+  @Public()
   findOne(@Param("id") id: string) {
     return this.employeeService.findOne(+id);
   }

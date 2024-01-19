@@ -56,6 +56,11 @@ export class BookController {
     return this.bookService.getFinishedOrdersByMonth(year);
   }
 
+  @Get("/status-booking/:year")
+  getBookingStatusByMonth(@Param("year") year?: string) {
+    return this.bookService.getBookingStatusByMonth(year);
+  }
+
   @Get("/user/:id")
   findBookingByUserId(@Param("id") id: string) {
     return this.bookService.findBookingByUserId(+id);
