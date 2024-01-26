@@ -19,7 +19,9 @@ export class CustomizedComboService {
 
     await this.prisma.comboItem.createMany({
       data: createCustomizedComboDto.comboItems?.map((comboItem) => ({
-        ...comboItem,
+        menuItemId: +comboItem.menuItemId,
+        quantity: +comboItem.quantity,
+        comboMenuId: null,
         comboCustomizedMenuId: +customComboMenu.id,
         totalPrice: +comboItem.totalPrice,
         status: STATUS_COMBO.CUSTOMIZED,
@@ -57,11 +59,38 @@ export class CustomizedComboService {
     return `This action returns a #${id} customizedCombo`;
   }
 
-  update(id: number, updateCustomizedComboDto: UpdateCustomizedComboDto) {
-    return `This action updates a #${id} customizedCombo`;
+  async update(id: number, updateCustomizedComboDto: UpdateCustomizedComboDto) {
+    const customComboMenu = await this.prisma.customizedComboMenu.findUnique({
+      where: {
+        id: +id,
+      },
+    });
+    await this.prisma.comboItem.deleteMany({
+      where: {
+        comboCustomizedMenuId: +customComboMenu.id,
+      },
+    });
+
+    const updated = await this.prisma.comboItem.createMany({
+      data: updateCustomizedComboDto.comboItems?.map((comboItem) => ({
+        menuItemId: +comboItem.menuItemId,
+        quantity: +comboItem.quantity,
+        comboMenuId: null,
+        comboCustomizedMenuId: +customComboMenu.id,
+        totalPrice: +comboItem.totalPrice,
+        status: STATUS_COMBO.CUSTOMIZED,
+      })),
+    });
+
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customizedCombo`;
+  async remove(id: number) {
+    const deleted = await this.prisma.customizedComboMenu.delete({
+      where: {
+        id: +id,
+      },
+    });
+    return deleted;
   }
 }

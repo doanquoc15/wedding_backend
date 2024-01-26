@@ -8,11 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { TypeDishService } from "./type-dish.service";
 import { CreateTypeDishDto } from "./dto/create-type-dish.dto";
 import { UpdateTypeDishDto } from "./dto/update-type-dish.dto";
 import { GetAllTypeDish } from "./dto/type-dish.dto";
+import { Public } from "../common/decorators";
+import { RolesGuard } from "../common/guards/role.guard";
 
 @Controller("type-dish")
 export class TypeDishController {
@@ -24,11 +27,15 @@ export class TypeDishController {
   }
 
   @Get()
+  @Public()
+  @UseGuards(RolesGuard)
   findAll(@Query() query: GetAllTypeDish) {
     return this.typeDishService.findAll(query);
   }
 
   @Get(":id")
+  @Public()
+  @UseGuards(RolesGuard)
   findOne(@Param("id", ParseIntPipe) id: number) {
     return this.typeDishService.findOne(+id);
   }

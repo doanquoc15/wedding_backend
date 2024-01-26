@@ -55,8 +55,6 @@ export class BookService {
       const booking = await this.prisma.booking.create({
         data: { ...data },
       });
-
-      // Gửi email xác nhận đơn hàng
       if (booking) {
         await this.mail.sendMail({
           to: userCurrent.email,
@@ -102,7 +100,6 @@ export class BookService {
           from: admin.email,
         });
       }
-
       const customizedCombo = this.comboCustomized.create({
         bookingId: booking.id,
         userId: createBookDto?.userId || userId,
@@ -137,6 +134,9 @@ export class BookService {
             },
           },
         ],
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
@@ -191,6 +191,7 @@ export class BookService {
               zoneName: true,
             },
           },
+          customizedComboMenu: true,
         },
       }),
       this.prisma.booking.count(),
@@ -213,6 +214,7 @@ export class BookService {
             service: true,
           },
         },
+        customizedComboMenu: true,
       },
     });
 
@@ -360,10 +362,55 @@ export class BookService {
     return sortedResult;
   }
 
+  // async update(id: number, updateBookDto) {
+  //   const existingBooking = await this.prisma.booking.findUnique({
+  //     where: {
+  //       id: id,
+  //     },
+  //   });
+  //
+  //   if (!existingBooking) {
+  //     throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
+  //   }
+  //
+  //   const updatedBooking = await this.prisma.booking.update({
+  //     where: {
+  //       id: id,
+  //     },
+  //     data: {
+  //       userId: updateBookDto.userId || existingBooking.userId,
+  //       numberTable: updateBookDto.numberTable || existingBooking.numberTable,
+  //       numberOfGuest:
+  //         updateBookDto.numberOfGuest || existingBooking.numberOfGuest,
+  //       comboMenuId: updateBookDto.comboMenuId || existingBooking.comboMenuId,
+  //       serviceId: updateBookDto.serviceId || existingBooking.serviceId,
+  //       zoneId: updateBookDto.zoneId || existingBooking.zoneId,
+  //       toTime: updateBookDto.toTime
+  //         ? new Date(updateBookDto.toTime)
+  //         : existingBooking.toTime,
+  //       comeInAt: updateBookDto.comeInAt
+  //         ? new Date(updateBookDto.comeInAt)
+  //         : existingBooking.comeInAt,
+  //       comeOutAt: updateBookDto.comeOutAt
+  //         ? new Date(updateBookDto.comeOutAt)
+  //         : existingBooking.comeOutAt,
+  //       depositMoney:
+  //         updateBookDto.depositMoney || existingBooking.depositMoney,
+  //       totalMoney: updateBookDto.totalMoney || existingBooking.totalMoney,
+  //       statusBooking: updateBookDto.statusBooking || "PENDING",
+  //       statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
+  //     },
+  //   });
+  //   return updatedBooking;
+  // }
+
   async update(id: number, updateBookDto) {
     const existingBooking = await this.prisma.booking.findUnique({
       where: {
         id: id,
+      },
+      include: {
+        customizedComboMenu: true,
       },
     });
 
@@ -371,34 +418,60 @@ export class BookService {
       throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);
     }
 
+    const updatedBookingData = {
+      userId: Number(updateBookDto.userId),
+      numberTable: updateBookDto.numberTable || existingBooking.numberTable,
+      numberOfGuest:
+        updateBookDto.numberOfGuest || existingBooking.numberOfGuest,
+      comboMenuId: updateBookDto.comboMenuId || existingBooking.comboMenuId,
+      serviceId: updateBookDto.serviceId || existingBooking.serviceId,
+      zoneId: updateBookDto.zoneId || existingBooking.zoneId,
+      toTime: updateBookDto.toTime
+        ? new Date(updateBookDto.toTime)
+        : existingBooking.toTime,
+      comeInAt: updateBookDto.comeInAt
+        ? new Date(updateBookDto.comeInAt)
+        : existingBooking.comeInAt,
+      comeOutAt: updateBookDto.comeOutAt
+        ? new Date(updateBookDto.comeOutAt)
+        : existingBooking.comeOutAt,
+      depositMoney: updateBookDto.depositMoney || existingBooking.depositMoney,
+      totalMoney: updateBookDto.totalMoney || existingBooking.totalMoney,
+      statusBooking: updateBookDto.statusBooking,
+      statusPayment: updateBookDto.statusPayment,
+    };
+
+    if (updateBookDto.comboItems && updateBookDto.comboItems.length > 0) {
+      console.log(updateBookDto.comboItems, existingBooking);
+      // Nếu có comboItems trong updateBookDto, cập nhật hoặc tạo mới customizedCombo
+      if (existingBooking.customizedComboMenu?.id) {
+        // Nếu customizedCombo đã tồn tại, cập nhật lại thông tin của nó
+        this.comboCustomized.update(existingBooking?.customizedComboMenu?.id, {
+          bookingId: existingBooking.id,
+          userId: existingBooking.userId,
+          comboMenuId: existingBooking.comboMenuId,
+          comboItems: updateBookDto.comboItems,
+        });
+      } else {
+        // Nếu customizedCombo chưa tồn tại, tạo mới customizedCombo
+        this.comboCustomized.create({
+          bookingId: existingBooking.id,
+          userId: existingBooking.userId,
+          comboMenuId: existingBooking.comboMenuId,
+          comboItems: updateBookDto.comboItems,
+        });
+      }
+    }
+
+    // Cập nhật thông tin của đơn hàng
+    console.log(updatedBookingData);
     const updatedBooking = await this.prisma.booking.update({
       where: {
         id: id,
       },
-      data: {
-        userId: updateBookDto.userId || existingBooking.userId,
-        numberTable: updateBookDto.numberTable || existingBooking.numberTable,
-        numberOfGuest:
-          updateBookDto.numberOfGuest || existingBooking.numberOfGuest,
-        comboMenuId: updateBookDto.comboMenuId || existingBooking.comboMenuId,
-        serviceId: updateBookDto.serviceId || existingBooking.serviceId,
-        zoneId: updateBookDto.zoneId || existingBooking.zoneId,
-        toTime: updateBookDto.toTime
-          ? new Date(updateBookDto.toTime)
-          : existingBooking.toTime,
-        comeInAt: updateBookDto.comeInAt
-          ? new Date(updateBookDto.comeInAt)
-          : existingBooking.comeInAt,
-        comeOutAt: updateBookDto.comeOutAt
-          ? new Date(updateBookDto.comeOutAt)
-          : existingBooking.comeOutAt,
-        depositMoney:
-          updateBookDto.depositMoney || existingBooking.depositMoney,
-        totalMoney: updateBookDto.totalMoney || existingBooking.totalMoney,
-        statusBooking: updateBookDto.statusBooking || "PENDING",
-        statusPayment: updateBookDto.statusPayment || STATUS_PAYMENT.UNPAID,
-      },
+      data: updatedBookingData,
     });
+
     return updatedBooking;
   }
 
@@ -421,7 +494,7 @@ export class BookService {
 
     const createNotification = await this.notification.create({
       userId: updateStatusBooking?.userId,
-      description: `Đơn hàng ${updateStatusBooking.id} của bạn đã được cập nhật trạng thái thành ${updateStatusBooking.statusBooking}`,
+      description: `Đơn hàng ${updateStatusBooking.id} của bạn đã được cập nhật ${updateStatusBooking.statusBooking}`,
       title: `Cập nhật trạng thái đơn hàng thành ${updateStatusBooking.statusBooking}`,
       isRead: false,
       type: TYPE_NOTIFICATION.INFO,
@@ -593,6 +666,19 @@ export class BookService {
   }
 
   async remove(id: number) {
+    const existingBooking = await this.prisma.booking.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        customizedComboMenu: true,
+      },
+    });
+
+    if (existingBooking?.customizedComboMenu?.id) {
+      await this.comboCustomized.remove(existingBooking.customizedComboMenu.id);
+    }
+
     const deletedBooking = await this.prisma.booking.delete({
       where: {
         id,

@@ -22,7 +22,7 @@ export class NotificationService {
     return notifi;
   }
 
-  async findAllByUser(userId: number) {
+  async findAllByUser(userId?: number) {
     if (!userId) throw new Error("userId is required");
 
     const notifications = await this.prisma.notification.findMany({

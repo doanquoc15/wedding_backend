@@ -8,12 +8,15 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
 import { UpdateNotificationDto } from "./dto/update-notification.dto";
 import { ApiBearerAuth } from "@nestjs/swagger";
 import { NotificationService } from "./notification.service";
 import { FindAllNotificationDto } from "./dto/findAllNotification.dto";
+import { RolesGuard } from "../common/guards/role.guard";
+import { Public } from "../common/decorators";
 
 @Controller("notification")
 @ApiBearerAuth()
@@ -26,16 +29,22 @@ export class NotificationController {
   }
 
   @Get()
+  @Public()
+  @UseGuards(RolesGuard)
   findAll(@Query() query: FindAllNotificationDto) {
     return this.notification.findAll(query);
   }
 
   @Get(":id")
+  @Public()
+  @UseGuards(RolesGuard)
   findOne(@Param("id") id: string) {
     return this.notification.findOne(id);
   }
 
   @Get("/user/:id")
+  @Get(":id")
+  @Public()
   findAllByUserId(@Param("id") id: string) {
     return this.notification.findAllByUser(+id);
   }

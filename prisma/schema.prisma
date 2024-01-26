@@ -30,7 +30,6 @@ model User {
   password    String
   status      STATUS_USER       @default(ACTIVE)
   address     String?
-  hashedRt    String?
   createdAt   DateTime          @default(now()) @map("created_at")
   updatedAt   DateTime          @updatedAt @map("updated_at")
 
@@ -236,18 +235,6 @@ model Service {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("services")
-}
-
-// 13
-model RestaurantInformation {
-  id          Int    @id @default(autoincrement())
-  filed       String
-  description String
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("restaurant_information")
 }
 
 // 14
