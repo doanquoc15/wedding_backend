@@ -75,7 +75,7 @@ export class BookService {
         });
       }
 
-      return booking;
+      return { booking };
     } else {
       const booking = await this.prisma.booking.create({
         data: { ...data },
@@ -403,7 +403,6 @@ export class BookService {
   //   });
   //   return updatedBooking;
   // }
-
   async update(id: number, updateBookDto) {
     const existingBooking = await this.prisma.booking.findUnique({
       where: {
@@ -435,17 +434,14 @@ export class BookService {
       comeOutAt: updateBookDto.comeOutAt
         ? new Date(updateBookDto.comeOutAt)
         : existingBooking.comeOutAt,
-      depositMoney: updateBookDto.depositMoney || existingBooking.depositMoney,
-      totalMoney: updateBookDto.totalMoney || existingBooking.totalMoney,
+      depositMoney: updateBookDto.depositMoney,
+      totalMoney: updateBookDto.totalMoney,
       statusBooking: updateBookDto.statusBooking,
       statusPayment: updateBookDto.statusPayment,
     };
 
     if (updateBookDto.comboItems && updateBookDto.comboItems.length > 0) {
-      console.log(updateBookDto.comboItems, existingBooking);
-      // Nếu có comboItems trong updateBookDto, cập nhật hoặc tạo mới customizedCombo
       if (existingBooking.customizedComboMenu?.id) {
-        // Nếu customizedCombo đã tồn tại, cập nhật lại thông tin của nó
         this.comboCustomized.update(existingBooking?.customizedComboMenu?.id, {
           bookingId: existingBooking.id,
           userId: existingBooking.userId,
@@ -453,7 +449,6 @@ export class BookService {
           comboItems: updateBookDto.comboItems,
         });
       } else {
-        // Nếu customizedCombo chưa tồn tại, tạo mới customizedCombo
         this.comboCustomized.create({
           bookingId: existingBooking.id,
           userId: existingBooking.userId,
@@ -463,13 +458,11 @@ export class BookService {
       }
     }
 
-    // Cập nhật thông tin của đơn hàng
-    console.log(updatedBookingData);
     const updatedBooking = await this.prisma.booking.update({
       where: {
         id: id,
       },
-      data: updatedBookingData,
+      data: { ...updatedBookingData },
     });
 
     return updatedBooking;

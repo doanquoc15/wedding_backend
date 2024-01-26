@@ -3,37 +3,104 @@
 
 <head>
     <style>
+        body {
+            font-family: Arial;
+            font-size: 14px;
+        }
 
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+        }
+
+        .message a {
+            color: blue;
+            text-decoration: none;
+        }
+
+        .order-details {
+            margin-bottom: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .order-details li {
+            margin-bottom: 10px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            max-width: fit-content;
+            color: white;
+            font-weight: bold;
+        }
+
+        .status.rejected {
+            background-color: red;
+        }
+
+        .status.approved {
+            background-color: orange;
+        }
+
+        .status.new {
+            background-color: green;
+        }
+
+        .status.pending {
+            background-color: deepskyblue;
+        }
+
+        .status.finished {
+            background-color: purple;
+        }
+
+        .signature {
+            margin-top: 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 
-<body style="font-family: Arial; font-size: 14px">
+<body>
 <h1>Thanh toán đơn hàng</h1>
-<div>Xin chào, <%= name %></div>
-<div>Cảm ơn bạn đã đặt dịch vụ tại <a href="https://www.abc.com">Sky View Restaurant</a>. Đơn hàng của bạn đã được
-    tiếp nhận và đang được xử lý.</div>
+<div class="message">
+    Xin chào, <%= name %>
 </div>
-<div>Sau đây là chi tiết đơn hàng của bạn : </div>
-<ul>
+<div class="message">
+    Cảm ơn bạn đã đặt dịch vụ tại <a href="https://wedding-frontend-seven.vercel.app">Sky View Restaurant</a>.
+    Đơn hàng của bạn đã được tiếp nhận và đang được xử lý.
+</div>
+<div>
+    Chi tiết đơn hàng:
+</div>
+<ul class="order-details">
     <li>Ngày nhận phòng: <%= toTime %></li>
-    </li>
+    <li>Khoảng thời gian: <%= comeInAt %> - <%= comeOutAt %></li>
     <li>Số lượng khách : <%= numberOfGuest %></li>
     <li>Số bàn đã đặt : <%= numberTable %></li>
     <li>Tổng tiền thanh toán : <%= totalMoney %></li>
     <li>Tổng tiền cọc trước : <%= depositMoney %></li>
 </ul>
-<div>Trạng thái </div>
-<% if (statusBooking === "PENDING") { %>
-    <div style="color: white; padding: 10px; background-color: red; max-width: fit-content;border-radius: 4px;">Đang chờ
-        duyệt</div>
-<% } %>
-
-<% if (statusBooking === "APPROVED") { %>
-    <div style="color: white; padding: 10px; background-color: green;max-width: fit-content;border-radius: 4px;">Đã
-        duyệt</div>
-<% } %>
+<div class="status <%= statusBooking.toLowerCase() %>">
+    <% if (statusBooking === "NEW") { %> Đang chờ duyệt
+    <% } %>
+    <% if (statusBooking === "PENDING") { %> Xác nhận thêm
+    <% } %>
+    <% if (statusBooking === "FINISHED") { %> Đã hoàn thành
+    <% } %>
+    <% if (statusBooking === "APPROVED") { %> Đã duyệt
+    <% } %>
+    <% if (statusBooking === "REJECTED") { %> Đã hủy
+    <% } %>
+</div>
 <div>Cảm ơn!</div>
-<div>Sky View</div>
+<div class="signature">Sky View</div>
 </body>
 
 </html>
