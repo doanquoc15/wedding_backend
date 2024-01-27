@@ -54,7 +54,14 @@ export class MenuItemService {
           typeDish: true,
         },
       }),
-      this.prisma.menuItem.count({ where: typeCondition }),
+      this.prisma.menuItem.count({
+        where: {
+          ...typeCondition,
+          dishName: search
+            ? { contains: search, mode: "insensitive" }
+            : undefined,
+        },
+      }),
     ]);
 
     return { menus, total };

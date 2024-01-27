@@ -49,7 +49,16 @@ export class ServiceService {
       },
     });
 
-    const total = await this.prisma.service.count();
+    const total = await this.prisma.service.count({
+      where: {
+        serviceName: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
+    });
 
     return {
       total,

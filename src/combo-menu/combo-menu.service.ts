@@ -60,7 +60,17 @@ export class ComboMenuService {
       },
     });
 
-    const total = await this.prisma.comboMenu.count();
+    const total = await this.prisma.comboMenu.count({
+      where: {
+        ...typeCondition,
+        comboName: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
+    });
 
     return {
       total,

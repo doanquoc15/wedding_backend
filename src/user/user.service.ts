@@ -68,7 +68,16 @@ export class UserService {
         role: true,
       },
     });
-    const total = await this.prisma.user.count();
+    const total = await this.prisma.user.count({
+      where: {
+        name: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
+    });
 
     if (!users) {
       throw new NotFoundException(MESSAGE.USER.NOT_FOUND);

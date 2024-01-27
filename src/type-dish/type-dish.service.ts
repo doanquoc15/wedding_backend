@@ -39,7 +39,16 @@ export class TypeDishService {
       },
     });
 
-    const total = await this.prisma.typeDish.count();
+    const total = await this.prisma.typeDish.count({
+      where: {
+        typeName: search
+          ? {
+              contains: search,
+              mode: "insensitive",
+            }
+          : undefined,
+      },
+    });
 
     return {
       total,

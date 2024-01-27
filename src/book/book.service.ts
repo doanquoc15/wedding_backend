@@ -112,7 +112,9 @@ export class BookService {
   }
 
   async findAll(query: GetAllBookDto) {
-    const { pageSize, pageIndex, search, statusBooking, toTime } = query;
+    const { pageSize, pageIndex, search, statusBooking, toTime, endTime } =
+      query;
+
     const skip = (Number(pageIndex || 1) - 1) * Number(pageSize || 5) || 0;
     const take = +pageSize || 5;
 
@@ -165,11 +167,16 @@ export class BookService {
               : undefined,
           },
           statusBooking: statusBooking ? statusBooking : undefined,
-          toTime: toTime
-            ? {
-                equals: new Date(toTime as string).toISOString(),
-              }
-            : undefined,
+          AND: [
+            toTime && endTime
+              ? {
+                  toTime: {
+                    gte: new Date(toTime as string).toISOString(),
+                    lte: new Date(endTime as string).toISOString(),
+                  },
+                }
+              : {},
+          ],
         },
         skip,
         take,
@@ -194,7 +201,29 @@ export class BookService {
           customizedComboMenu: true,
         },
       }),
-      this.prisma.booking.count(),
+      this.prisma.booking.count({
+        where: {
+          user: {
+            name: search
+              ? {
+                  contains: search,
+                  mode: "insensitive",
+                }
+              : undefined,
+          },
+          statusBooking: statusBooking ? statusBooking : undefined,
+          AND: [
+            toTime && endTime
+              ? {
+                  toTime: {
+                    gte: new Date(toTime as string).toISOString(),
+                    lte: new Date(endTime as string).toISOString(),
+                  },
+                }
+              : {},
+          ],
+        },
+      }),
     ]);
     if (!booking) {
       throw new NotFoundException(MESSAGE.BOOKING.NOT_FOUND);

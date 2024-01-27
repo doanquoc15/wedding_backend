@@ -21,4 +21,7 @@ export class GetAllBookDto {
   @IsString()
   @IsOptional()
   toTime: string;
+  @IsString()
+  @IsOptional()
+  endTime: string;
 }
