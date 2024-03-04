@@ -34,8 +34,9 @@ async function bootstrap() {
   );
 
   // Register handlebars helpers
-  await app.listen(process.env.PORT || 8080, () => {
+  await app.listen(process.env.PORT || "0.0.0.0", () => {
     console.log("Server run with PORT ", process.env.PORT);
   });
 }
+
 bootstrap();

@@ -28,7 +28,6 @@ export class BookController {
 
   @Get()
   findAll(@Query() query: GetAllBookDto) {
-    console.log(query);
     return this.bookService.findAll(query);
   }
 

@@ -362,7 +362,6 @@ export class BookService {
     year?: number | string,
   ): Promise<{ month: number; quantity: number }[]> {
     const currentYear = year || new Date().getFullYear();
-    console.log(currentYear);
     const finishedOrders = await this.prisma.booking.findMany({
       where: {
         statusBooking: "FINISHED",
@@ -544,7 +543,6 @@ export class BookService {
 
   async getBookingStatusByMonth(year: string) {
     const currentYear = +year || new Date().getFullYear();
-    console.log(currentYear);
     const bookings = await this.prisma.booking.findMany({
       where: {
         toTime: {
